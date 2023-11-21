@@ -1,6 +1,10 @@
+# inference.py
+import sys
+print(sys.path)
+
 import os
 from dataclasses import dataclass, asdict
-from ctransformers import AutoModelForCausalLM, AutoConfig
+from transformers import AutoConfig, AutoModelForCausalLM
 
 
 @dataclass
@@ -16,29 +20,15 @@ class GenerationConfig:
     threads: int
     stop: list[str]
 
-
 def format_prompt(system_prompt: str, user_prompt: str):
     """format prompt based on: https://huggingface.co/spaces/mosaicml/mpt-7b-chat/blob/main/app.py"""
-
-    system_prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
-    user_prompt = f"<|im_start|>user\n{user_prompt}<|im_end|>\n"
-    assistant_prompt = f"<|im_start|>assistant\n"
-
+    system_prompt = f"system\n{system_prompt}\n"
+    user_prompt = f"user\n{user_prompt}\n"
+    assistant_prompt = f"assistant\n"
     return f"{system_prompt}{user_prompt}{assistant_prompt}"
 
-
-def generate(
-    llm: AutoModelForCausalLM,
-    generation_config: GenerationConfig,
-    system_prompt: str,
-    user_prompt: str,
-     model_path: str 
-
-
-
-):
+def generate(llm: AutoModelForCausalLM, generation_config: GenerationConfig, system_prompt: str, user_prompt: str):
     """run model inference, will return a Generator if streaming is true"""
-
     return llm(
         format_prompt(
             system_prompt,
@@ -47,14 +37,14 @@ def generate(
         **asdict(generation_config),
     )
 
+def load_model_from_hub(model_name: str, trust_remote_code: bool = True):
+    config = AutoConfig.from_pretrained(model_name, context_length=8192, trust_remote_code=trust_remote_code)
+    llm = AutoModelForCausalLM.from_pretrained(model_name, config=config, cache_dir=True)
+    return llm
 
 if __name__ == "__main__":
-    config = AutoConfig.from_pretrained("mosaicml/mpt-7b-chat", context_length=8192)
-    llm = AutoModelForCausalLM.from_pretrained(
-        os.path.abspath("models/mpt-7b-chat.ggmlv0.q4_1.bin"),
-        model_type="mpt",
-        config=config,
-    )
+    model_name = "mosaicml/mpt-7b-chat"
+    llm = load_model_from_hub(model_name, trust_remote_code=True)
 
     system_prompt = "A conversation between a user and an LLM-based AI assistant named Local Assistant. Local Assistant gives helpful and honest answers."
 
@@ -68,7 +58,7 @@ if __name__ == "__main__":
         reset=False,  # reset history (cache)
         stream=True,  # streaming per word/token
         threads=int(os.cpu_count() / 2),  
-        stop=["<|im_end|>", "|<"],
+        stop=["", "|<"],
     )
 
     user_prefix = "[user]: "
