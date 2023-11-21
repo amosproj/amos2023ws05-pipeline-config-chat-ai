@@ -1,0 +1,13 @@
+version: '3'  # Docker Compose version being used
+name: docker-chatui-stack  # name of the Docker stack 
+services:
+
+    app: 
+      container_name: docker-model-app  # Custom name for the app container
+      restart: always  # Restart policy for the app container 
+      build: .  # Location of the Dockerfile for building the app container
+      ports:  #Ports to expose for the app container 
+        - '3001:3000'  # Map port 3000 of the container to port 3001 on the host
+      
+     
+         
