@@ -1,11 +1,7 @@
-# inference.py
 import sys
-print(sys.path)
-
 import os
 from dataclasses import dataclass, asdict
-from transformers import AutoConfig, AutoModelForCausalLM
-
+from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 @dataclass
 class GenerationConfig:
@@ -14,37 +10,34 @@ class GenerationConfig:
     top_p: float
     repetition_penalty: float
     max_new_tokens: int
-    seed: int
-    reset: bool
-    stream: bool
-    threads: int
-    stop: list[str]
 
 def format_prompt(system_prompt: str, user_prompt: str):
-    """format prompt based on: https://huggingface.co/spaces/mosaicml/mpt-7b-chat/blob/main/app.py"""
     system_prompt = f"system\n{system_prompt}\n"
     user_prompt = f"user\n{user_prompt}\n"
     assistant_prompt = f"assistant\n"
     return f"{system_prompt}{user_prompt}{assistant_prompt}"
 
-def generate(llm: AutoModelForCausalLM, generation_config: GenerationConfig, system_prompt: str, user_prompt: str):
-    """run model inference, will return a Generator if streaming is true"""
-    return llm(
-        format_prompt(
-            system_prompt,
-            user_prompt,
-        ),
-        **asdict(generation_config),
+def generate(llm: AutoModelForCausalLM, tokenizer: AutoTokenizer, generation_config: GenerationConfig, prompt: str):
+    inputs = tokenizer(prompt, return_tensors="pt")
+    outputs = llm.generate(
+        **inputs,
+        temperature=generation_config.temperature,
+        top_k=generation_config.top_k,
+        top_p=generation_config.top_p,
+        repetition_penalty=generation_config.repetition_penalty,
+        max_new_tokens=generation_config.max_new_tokens
     )
+    return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-def load_model_from_hub(model_name: str, trust_remote_code: bool = True):
-    config = AutoConfig.from_pretrained(model_name, context_length=8192, trust_remote_code=trust_remote_code)
-    llm = AutoModelForCausalLM.from_pretrained(model_name, config=config, cache_dir=True)
-    return llm
+def load_model_and_tokenizer(model_name: str, trust_remote_code: bool = True):
+    config = AutoConfig.from_pretrained(model_name, trust_remote_code=trust_remote_code)
+    llm = AutoModelForCausalLM.from_pretrained(model_name, config=config, trust_remote_code=trust_remote_code)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=trust_remote_code, use_fast=True)
+    return llm, tokenizer
 
 if __name__ == "__main__":
     model_name = "mosaicml/mpt-7b-chat"
-    llm = load_model_from_hub(model_name, trust_remote_code=True)
+    llm, tokenizer = load_model_and_tokenizer(model_name, trust_remote_code=True)
 
     system_prompt = "A conversation between a user and an LLM-based AI assistant named Local Assistant. Local Assistant gives helpful and honest answers."
 
@@ -53,21 +46,14 @@ if __name__ == "__main__":
         top_k=0,
         top_p=0.9,
         repetition_penalty=1.0,
-        max_new_tokens=512,  # adjust as needed
-        seed=42,
-        reset=False,  # reset history (cache)
-        stream=True,  # streaming per word/token
-        threads=int(os.cpu_count() / 2),  
-        stop=["", "|<"],
+        max_new_tokens=512,
     )
 
-    user_prefix = "[user]: "
-    assistant_prefix = f"[assistant]:"
+    assistant_prefix = "[assistant]:"
 
-    while True:
-        user_prompt = input(user_prefix)
-        generator = generate(llm, generation_config, system_prompt, user_prompt.strip())
-        print(assistant_prefix, end=" ", flush=True)
-        for word in generator:
-            print(word, end="", flush=True)
-        print("")
+    # Hardcoded user prompt
+    hardcoded_user_prompt = "What is the weather like today?"
+
+    prompt = format_prompt(system_prompt, hardcoded_user_prompt)
+    response = generate(llm, tokenizer, generation_config, prompt)
+    print(assistant_prefix, response)
