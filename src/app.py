@@ -5,7 +5,7 @@ st.title("Simple Chat with GPT-2")
 
 # Hugging Face API settings
 API_URL = "https://api-inference.huggingface.co/models/rwl4/gpt2-medium-chat"
-headers = {"Authorization": "Bearer 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"}
+headers = {"Authorization": "Bearer YOUR_HUGGINGFACE_TOKEN"}
 
 # Function to query the Hugging Face model
 def query(payload):
