@@ -1,0 +1,30 @@
+name: rtdip-sdk
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - notebook=6.4.12
+  - python==3.10.9
+  - azure-storage-file-datalake==12.10.1
+  - azure-keyvault-secrets==4.7.0
+  - azure-identity==1.12.0
+  - pyodbc==4.0.39
+  - pandas==1.5.2
+  - jinja2==3.0.3
+  - jinjasql==0.1.8
+  - pyspark==3.3.2
+  - delta-spark==2.3.0
+  - dependency_injector==4.41.0
+  - pydantic==1.10.7
+  - boto3==1.26.123
+  - semver==3.0.0
+  - xlrd==2.0.1
+  - pip==23.1.2
+  - awscli==1.27.142
+  - filelock==3.12.2
+  - web3==6.5.0
+  - pip:
+    - hvac==1.1.0
+    - rtdip-sdk==0.6.1
+
