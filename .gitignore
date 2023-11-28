@@ -34,3 +34,5 @@ bin/
 
 # MacOS
 .DS_Store
+
+.databricks
