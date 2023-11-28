@@ -5,6 +5,7 @@ import os
 # App title
 st.set_page_config(page_title="Pipeline Generation Chatbot")
 
+
 # Replicate Credentials
 with st.sidebar:
     st.title('Pipeline Generation Chatbot')
@@ -30,9 +31,11 @@ with st.sidebar:
     max_length = st.sidebar.slider('max_length', min_value=32, max_value=128, value=120, step=8)
     st.markdown('📖 Learn how to build this app in this [blog](https://blog.streamlit.io/how-to-build-a-llama-2-chatbot/)!')
 
+
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
+
 
 # Display or clear chat messages
 for message in st.session_state.messages:
@@ -42,6 +45,7 @@ for message in st.session_state.messages:
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
 st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
+
 
 # Function for generating LLaMA2 response. Refactored from https://github.com/a16z-infra/llama2-chatbot
 def generate_llama2_response(prompt_input):
@@ -56,11 +60,13 @@ def generate_llama2_response(prompt_input):
                                   "temperature":temperature, "top_p":top_p, "max_length":max_length, "repetition_penalty":1})
     return output
 
+
 # User-provided prompt
 if prompt := st.chat_input(disabled=not replicate_api):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
+
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
