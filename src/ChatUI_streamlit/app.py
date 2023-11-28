@@ -71,7 +71,7 @@ def generate_llama2_response(prompt_input):
 
 # User-provided prompt
 if prompt := st.chat_input(disabled=not replicate_api):
-    # Use the user's prompt as the title without modification
+    # Use the user's prompt as the title 
     title = prompt
     
     st.session_state.conversations[-1]["title"] = title
@@ -94,3 +94,7 @@ if st.session_state.conversations[-1]["messages"][-1]["role"] != "assistant":
     
     message = {"role": "assistant", "content": full_response}
     st.session_state.conversations[-1]["messages"].append(message)
+    
+    
+    
+    
