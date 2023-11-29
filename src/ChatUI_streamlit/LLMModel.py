@@ -9,7 +9,7 @@ from langchain.document_loaders import TextLoader
 from langchain.prompts import PromptTemplate
 
 
-YourAPIKey = os.environ['OPENAI_API_KEY'] # This is the API key for OpenAI
+# YourAPIKey = os.environ['OPENAI_API_KEY'] # This is the API key for OpenAI
 
 load_dotenv() # Load the .env file
 
@@ -22,7 +22,7 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 
 # This is the root directory for the documents i want to create the RAG from
 root_dir = '/Users/zainhazzouri/projects/RAG-Playground/core/src/sdk/python/rtdip_sdk/pipelines'
-docs = []
+docs = [] # Create an empty list to store the docs
 
 # Go through each folder to extract all the files
 for dirpath, dirnames, filenames in os.walk(root_dir):
