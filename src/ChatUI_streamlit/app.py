@@ -1,7 +1,8 @@
 import streamlit as st
 import replicate
 import os
-from LLMModel import RAG as RAG
+
+from LLMModel import RAG
 
 # App title
 st.set_page_config(page_title="RTDIP PipeLine Chatbot")
@@ -52,21 +53,24 @@ st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
 
 # User-provided prompt
-if prompt := st.chat_input(): #
-    # Use the user's prompt as the title 
-    title = prompt
+if prompt := st.chat_input():
+    # Get the conversation context
+    conversation = st.session_state.conversations[-1]
     
-    st.session_state.conversations[-1]["title"] = title
-    st.session_state.conversations[-1]["messages"].append({"role": "user", "content": prompt})
+    # Use the entire conversation context as input
+    context = "\n".join([message["content"] for message in conversation["messages"]])
     
+    # Add the user's input to the conversation
+    conversation["messages"].append({"role": "user", "content": prompt})
+
+    # Display user's input in the chat
     with st.chat_message("user"):
         st.write(prompt)
 
-# Generate a new response if the last message is not from the assistant
-if st.session_state.conversations[-1]["messages"][-1]["role"] != "assistant":
+    # Generate a new response considering the entire conversation context
     with st.chat_message("assistant"):
         with st.spinner("Generating..."):
-            response = RAG.run(prompt)
+            response = RAG.run(context)
             placeholder = st.empty()
             full_response = ''
             for item in response:
@@ -74,9 +78,8 @@ if st.session_state.conversations[-1]["messages"][-1]["role"] != "assistant":
                 placeholder.markdown(full_response)
             placeholder.markdown(full_response)
 
+    # Add the assistant's response to the conversation
     message = {"role": "assistant", "content": full_response}
-    st.session_state.conversations[-1]["messages"].append(message)
-    
-    
+    conversation["messages"].append(message)
     
     
