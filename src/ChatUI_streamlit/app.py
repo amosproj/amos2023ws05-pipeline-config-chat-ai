@@ -1,6 +1,7 @@
 import streamlit as st
 import replicate
 import os
+import time
 
 from LLMModel import RAG
 
@@ -67,6 +68,7 @@ if prompt := st.chat_input():
     with st.chat_message("user"):
         st.write(prompt)
 
+    start_time = time.time() # to calculate the time taken to generate the response
     # Generate a new response considering the entire conversation context
     with st.chat_message("assistant"):
         with st.spinner("Generating..."):
@@ -77,6 +79,11 @@ if prompt := st.chat_input():
                 full_response += item
                 placeholder.markdown(full_response)
             placeholder.markdown(full_response)
+
+    end_time = time.time() # to calculate the time taken to generate the response
+    # Calculate the time taken
+    response_time = end_time - start_time
+    st.write(f"Response generated in {response_time:.2f} seconds.")
 
     # Add the assistant's response to the conversation
     message = {"role": "assistant", "content": full_response}
