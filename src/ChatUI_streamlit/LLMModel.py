@@ -7,38 +7,73 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.document_loaders import TextLoader
 from langchain.prompts import PromptTemplate
+from langchain.cache import InMemoryCache
+from langchain.globals import set_llm_cache
+from langchain.memory import ConversationSummaryMemory
+from langchain.chains import ConversationalRetrievalChain
+from langchain.chat_models import ChatOpenAI
+from langchain.document_loaders.generic import GenericLoader
+from langchain.document_loaders.parsers import LanguageParser
+from langchain.text_splitter import Language
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.chains import ConversationalRetrievalChain
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationSummaryMemory
 
 
-# YourAPIKey = os.environ['OPENAI_API_KEY'] # This is the API key for OpenAI
+load_dotenv("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/.env")
+openai_api_key = os.getenv('OPENAI_API_KEY')
 
-load_dotenv() # Load the .env file
+# Check if the API key is loaded
+if openai_api_key is None:
+    print("Failed to load the OpenAI API key from .env file.")
+else:
+    print("OpenAI API key loaded successfully.")
 
-openai_api_key=os.getenv('OPENAI_API_KEY', 'YourAPIKey') # Get the API key from the .env file
 
-llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai_api_key) # Load the LLM model
+llm = ChatOpenAI(model_name='gpt-3.5-turbo',openai_api_key=openai_api_key) # Load the LLM model
+set_llm_cache(InMemoryCache())
 
 
 embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key) # Load the embeddings
 
 # This is the root directory for the documents i want to create the RAG from
-root_dir = '/Users/zainhazzouri/projects/RAG-Playground/core/src/sdk/python/rtdip_sdk/pipelines'
-docs = [] # Create an empty list to store the docs
+repo_path = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines'
+loader = GenericLoader.from_filesystem(
+    repo_path,
+    glob="**/*",
+    suffixes=[".py"],
+    parser=LanguageParser(language=Language.PYTHON, parser_threshold=500),
+)
+documents = loader.load()
 
-# Go through each folder to extract all the files
-for dirpath, dirnames, filenames in os.walk(root_dir):
 
-    # Go through each file
-    for file in filenames:
-        try:
-            # Load up the file as a doc and split
-            loader = TextLoader(os.path.join(dirpath, file), encoding='utf-8')
-            docs.extend(loader.load_and_split())
-        except Exception as e:
-            pass
 
-docsearch = FAISS.from_documents(docs, embeddings) # Create the FAISS index
-# source https://python.langchain.com/docs/integrations/vectorstores/faiss_async
 
-# Get our retriever ready for the RAG or creating the chain
-RAG = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever())
-# source link for reference https://python.langchain.com/docs/use_cases/question_answering/document-context-aware-QA
+python_splitter = RecursiveCharacterTextSplitter.from_language(
+    language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
+)
+texts = python_splitter.split_documents(documents)
+
+
+db = Chroma.from_documents(texts, OpenAIEmbeddings(disallowed_special=()))
+retriever = db.as_retriever(
+    search_type="mmr",  # Also test "similarity"
+    search_kwargs={"k": 8},
+)
+
+memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
+
+
+
+
+
+RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory)
+
+question = "I would like to use RTDIP components to read from an eventhub using ‘connection string’ as the connection string, and ‘consumer group’ as the consumer group, transform using binary to string, and edge x transformer then write to delta, return only the python code "
+
+result = RAG(question)
+result["answer"]
+print(result["answer"])
