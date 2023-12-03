@@ -26,11 +26,10 @@ from langchain.memory import ConversationSummaryMemory
 load_dotenv("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/.env")
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
-# Check if the API key is loaded
-if openai_api_key is None:
-    print("Failed to load the OpenAI API key from .env file.")
-else:
-    print("OpenAI API key loaded successfully.")
+# check if the API key is loaded
+assert openai_api_key is not None, "Failed to load the OpenAI API key from .env file. Please create .env file and add OPENAI_API_KEY = 'your key'"
+
+
 
 
 llm = ChatOpenAI(model_name='gpt-3.5-turbo',openai_api_key=openai_api_key) # Load the LLM model
@@ -72,8 +71,8 @@ memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_me
 
 RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory)
 
-question = "I would like to use RTDIP components to read from an eventhub using ‘connection string’ as the connection string, and ‘consumer group’ as the consumer group, transform using binary to string, and edge x transformer then write to delta, return only the python code "
-
-result = RAG(question)
-result["answer"]
-print(result["answer"])
+# question = "I would like to use RTDIP components to read from an eventhub using ‘connection string’ as the connection string, and ‘consumer group’ as the consumer group, transform using binary to string, and edge x transformer then write to delta, return only the python code "
+#
+# result = RAG(question)
+# result["answer"]
+# print(result["answer"])
