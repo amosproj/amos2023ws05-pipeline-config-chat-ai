@@ -67,3 +67,10 @@ memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_me
 
 RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory)
 
+
+## this code for testing the model don't delete it -- Zain
+# question = "I would like to use RTDIP components to read from an eventhub using ‘connection string’ as the connection string, and ‘consumer group’ as the consumer group, transform using binary to string, and edge x transformer then write to delta, return only the python code "
+#
+# result = RAG(question)
+# result["answer"]
+# print(result["answer"])
