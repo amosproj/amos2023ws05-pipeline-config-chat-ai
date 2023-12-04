@@ -72,11 +72,13 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         with st.chat_message("user"):
             st.write(prompt)
 
-        start_time = time.time() # to calculate the time taken to generate the response
     # Generate a new response considering the entire conversation context
         with st.chat_message("assistant"):
+            start_time = time.time()  # to calculate the time taken to generate the response
             with st.spinner("Generating..."):
                 response = RAG.run(context)
+                end_time = time.time()  # to calculate the time taken to generate the response
+
                 placeholder = st.empty()
                 full_response = ''
                 for item in response:
@@ -84,7 +86,6 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
                     placeholder.markdown(full_response)
                 placeholder.markdown(full_response)
 
-        end_time = time.time() # to calculate the time taken to generate the response
     # Calculate the time taken
         response_time = end_time - start_time
         st.write(f"Response generated in {response_time:.2f} seconds.")

@@ -1,18 +1,9 @@
 
 # LLMModel
 import os
-from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.document_loaders import TextLoader
-from langchain.prompts import PromptTemplate
+
 from langchain.cache import InMemoryCache
 from langchain.globals import set_llm_cache
-from langchain.memory import ConversationSummaryMemory
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders.generic import GenericLoader
 from langchain.document_loaders.parsers import LanguageParser
 from langchain.text_splitter import Language
@@ -39,7 +30,7 @@ set_llm_cache(InMemoryCache())
 embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key) # Load the embeddings
 
 # This is the root directory for the documents i want to create the RAG from
-repo_path = '/Users/obi/Desktop/AMOS_New/amos2023ws05-pipeline-config-chat-ai/src/RAG'
+repo_path = '/Users/zainhazzouri/projects/temp/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines'
 loader = GenericLoader.from_filesystem(
     repo_path,
     glob="**/*",
