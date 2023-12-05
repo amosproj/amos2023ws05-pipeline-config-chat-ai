@@ -34,8 +34,7 @@ COPY requirements.txt ./
 RUN pip3 install -r requirements.txt
 # Copy the RAG folder, .env file, and ChatUI_streamlit folder into the container
 COPY RAG/ RAG/
-COPY .env ./
-COPY ChatUI_streamlit/.streamlit .streamlit
+#COPY ChatUI_streamlit/.streamlit .streamlit
 COPY ChatUI_streamlit/LLMModel.py/ LLMModel.py
 
 # Copy the app.py file

@@ -7,4 +7,3 @@ openai
 faiss-cpu
 chromadb
 replicate
-dotenv
