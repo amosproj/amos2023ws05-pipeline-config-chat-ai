@@ -17,7 +17,6 @@ from langchain.memory import ConversationSummaryMemory
 from langchain.vectorstores import FAISS
 from langchain.document_loaders.text import TextLoader
 
-os.environ["OPENAI_API_KEY"] = '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'
 openai_api_key = os.environ["OPENAI_API_KEY"]
 
 # check if the API key is loaded
