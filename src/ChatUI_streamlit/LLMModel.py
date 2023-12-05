@@ -13,12 +13,16 @@ from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationSummaryMemory
+from langchain.vectorstores import FAISS
+from langchain.document_loaders.text import TextLoader
+from dotenv import load_dotenv
 
-# # add the path to the .env file
-# load_dotenv("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/.env")
-# openai_api_key = os.getenv('OPENAI_API_KEY')
 
-openai_api_key = os.environ["OPENAI_API_KEY"]
+# add the path to the .env file
+load_dotenv("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/.env")
+openai_api_key = os.getenv('OPENAI_API_KEY')
+
+# openai_api_key = os.environ["OPENAI_API_KEY"]
 
 # check if the API key is loaded
 assert openai_api_key is not None, "Failed to load the OpenAI API key from .env file. Please create .env file and add OPENAI_API_KEY = 'your key'"
@@ -31,40 +35,71 @@ set_llm_cache(InMemoryCache())
 
 
 embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key) # Load the embeddings
+#
+# # This is the root directory for the documents i want to create the RAG from
+# repo_path = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG'
+# loader = GenericLoader.from_filesystem(
+#     repo_path,
+#     glob="**/*",
+#     suffixes=[".py"],
+#     parser=LanguageParser(language=Language.PYTHON, parser_threshold=500),
+# )
+# documents = loader.load()
+#
+# python_splitter = RecursiveCharacterTextSplitter.from_language(
+#     language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
+# )
+# texts = python_splitter.split_documents(documents)
+#
+#
+# db = Chroma.from_documents(texts, OpenAIEmbeddings(disallowed_special=()))
+# retriever = db.as_retriever(
+#     search_type="mmr",  # Also test "similarity"
+#     search_kwargs={"k": 8},
+# )
 
+##########################################  the old version of RAG
 # This is the root directory for the documents i want to create the RAG from
-repo_path = '/Users/zainhazzouri/projects/temp/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines'
-loader = GenericLoader.from_filesystem(
-    repo_path,
-    glob="**/*",
-    suffixes=[".py"],
-    parser=LanguageParser(language=Language.PYTHON, parser_threshold=500),
-)
-documents = loader.load()
+root_dir = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG'
+docs = [] # Create an empty list to store the docs
 
+# Go through each folder to extract all the files
+for dirpath, dirnames, filenames in os.walk(root_dir):
 
+    # Go through each file
+    for file in filenames:
+        try:
+            # Load up the file as a doc and split
+            loader = TextLoader(os.path.join(dirpath, file), encoding='utf-8')
+            docs.extend(loader.load_and_split())
+        except Exception as e:
+            pass
 
+docsearch = FAISS.from_documents(docs, embeddings) # Create the FAISS index
+# source https://python.langchain.com/docs/integrations/vectorstores/faiss_async
 
-python_splitter = RecursiveCharacterTextSplitter.from_language(
-    language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
-)
-texts = python_splitter.split_documents(documents)
-
-
-db = Chroma.from_documents(texts, OpenAIEmbeddings(disallowed_special=()))
-retriever = db.as_retriever(
-    search_type="mmr",  # Also test "similarity"
-    search_kwargs={"k": 8},
-)
 
 memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
+# RAG = RetrievalQA.from_chain_type(llm, retriever=docsearch.as_retriever(),memory=memory) # the old chain for the retrieval
 
-RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory)
+
+RAG = ConversationalRetrievalChain.from_llm(llm,chain_type="stuff", retriever=docsearch.as_retriever(),memory=memory) # the new chain for the retrieval
 
 
-## this code for testing the model don't delete it -- Zain
-# question = "I would like to use RTDIP components to read from an eventhub using ‘connection string’ as the connection string, and ‘consumer group’ as the consumer group, transform using binary to string, and edge x transformer then write to delta, return only the python code "
+##### this code for testing the model don't delete it --
+
+# question1 = " Hello , my name is Zain"
+# question2 = " what's my name?"
+# question3 = "I would like to use RTDIP components to read from an eventhub using ‘connection string’ as the connection string, and ‘consumer group’ as the consumer group, transform using binary to string, and edge x transformer then write to delta, return only the python code "
 #
-# result = RAG(question)
+# result = RAG(question1)
+# result["answer"]
+# print(result["answer"])
+#
+# result = RAG(question2)
+# result["answer"]
+# print(result["answer"])
+#
+# result = RAG(question3)
 # result["answer"]
 # print(result["answer"])
