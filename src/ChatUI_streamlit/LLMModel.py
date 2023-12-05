@@ -22,7 +22,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationSummaryMemory
 
-
+# add the path to the .env file
 load_dotenv("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/.env")
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
