@@ -18,11 +18,11 @@ from langchain.document_loaders.text import TextLoader
 from dotenv import load_dotenv
 
 
-# add the path to the .env file
-load_dotenv("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/.env")
-openai_api_key = os.getenv('OPENAI_API_KEY')
+# # add the path to the .env file
+# load_dotenv("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/.env")
+# openai_api_key = os.getenv('OPENAI_API_KEY')
 
-# openai_api_key = os.environ["OPENAI_API_KEY"]
+openai_api_key = os.environ["OPENAI_API_KEY"]
 
 # check if the API key is loaded
 assert openai_api_key is not None, "Failed to load the OpenAI API key from .env file. Please create .env file and add OPENAI_API_KEY = 'your key'"
@@ -60,7 +60,7 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 
 ##########################################  the old version of RAG
 # This is the root directory for the documents i want to create the RAG from
-root_dir = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG'
+root_dir = "/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines"
 docs = [] # Create an empty list to store the docs
 
 # Go through each folder to extract all the files
@@ -80,9 +80,9 @@ docsearch = FAISS.from_documents(docs, embeddings) # Create the FAISS index
 
 
 memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
+
+
 # RAG = RetrievalQA.from_chain_type(llm, retriever=docsearch.as_retriever(),memory=memory) # the old chain for the retrieval
-
-
 RAG = ConversationalRetrievalChain.from_llm(llm,chain_type="stuff", retriever=docsearch.as_retriever(),memory=memory) # the new chain for the retrieval
 
 

@@ -41,7 +41,7 @@ COPY ChatUI_streamlit/LLMModel.py/ LLMModel.py
 COPY ChatUI_streamlit/app.py ./
 
 # Make the port 8501 available to the world outside this container
-EXPOSE 8501
+EXPOSE 8501:8501
 
 # Run Streamlit when the container launches
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
