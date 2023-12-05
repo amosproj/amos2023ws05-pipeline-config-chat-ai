@@ -8,8 +8,8 @@ consisting of a block configuration (the steps in the pipeline) and PySpark code
 blocks to perform the data processing. Chat history and generated output should be visible to the user in parallel, e.g. chat history to the left, generated code to the right.
 
 ## Meet the Team 
-Scrum Master: [@SaraElBrak](https://github.com/SaraElBrak)
-Product Owners: [@AviKatziuk](https://github.com/AviKatziuk), [@ceciliabetb](https://github.com/ceciliabetb)
+Scrum Master: [@SaraElBrak](https://github.com/SaraElBrak)  
+Product Owners: [@AviKatziuk](https://github.com/AviKatziuk), [@ceciliabetb](https://github.com/ceciliabetb)  
 Software Developerss: [@lyndanajjar](https://github.com/lyndanajjar), [@bergzain](https://github.com/bergzain), [@Obismadi99](https://github.com/Obismadi99), [@Nahrain1](https://github.com/Nahrain1)
 
 The planning document of the team is found [here](https://docs.google.com/spreadsheets/d/1m1z2m_p6k0ATw0RVNXJMbDp-RrOOPxpu0c3PPCtrwBI/edit#gid=6) 
