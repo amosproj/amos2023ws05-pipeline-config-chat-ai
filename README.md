@@ -1,7 +1,7 @@
 # Pipeline Configuration Chat AI (AMOS WS23)
 
 <div style="text-align:center">
-  <img src="https://github.com/amosproj/amos2023ws05-pipeline-config-chat-ai/raw/main/Deliverables/sprint-01/team-logo.PNG" alt="Team Logo" width="500"/>
+  <img src="https://github.com/amosproj/amos2023ws05-pipeline-config-chat-ai/raw/main/Deliverables/sprint-01/team-logo.PNG" alt="Team Logo" width="350"/>
 </div>
 
 ## Project Mission 
