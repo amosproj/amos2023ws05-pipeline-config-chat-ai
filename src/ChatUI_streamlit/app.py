@@ -63,7 +63,7 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         conversation = st.session_state.conversations[-1]
     
     # Use the entire conversation context as input
-        context = "\n".join([message["content"] for message in conversation["messages"]])
+        #context = "\n".join([message["content"] for message in conversation["messages"]])
     
     # Add the user's input to the conversation
         conversation["messages"].append({"role": "user", "content": prompt})
@@ -76,7 +76,7 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         with st.chat_message("assistant"):
             start_time = time.time()  # to calculate the time taken to generate the response
             with st.spinner("Generating..."):
-                response = RAG.run(context)
+                response = RAG.run(prompt)
                 end_time = time.time()  # to calculate the time taken to generate the response
 
                 placeholder = st.empty()
@@ -95,3 +95,4 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         conversation["messages"].append(message)
     
     
+

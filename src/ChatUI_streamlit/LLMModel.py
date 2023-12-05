@@ -1,6 +1,7 @@
 
 # LLMModel
 import os
+from langchain.chains import RetrievalQA
 
 from langchain.cache import InMemoryCache
 from langchain.globals import set_llm_cache
@@ -15,13 +16,8 @@ from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationSummaryMemory
 from langchain.vectorstores import FAISS
 from langchain.document_loaders.text import TextLoader
-from dotenv import load_dotenv
 
-
-# # add the path to the .env file
-# load_dotenv("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/.env")
-# openai_api_key = os.getenv('OPENAI_API_KEY')
-
+os.environ["OPENAI_API_KEY"] = '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'
 openai_api_key = os.environ["OPENAI_API_KEY"]
 
 # check if the API key is loaded
@@ -60,7 +56,7 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 
 ##########################################  the old version of RAG
 # This is the root directory for the documents i want to create the RAG from
-root_dir = "/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines"
+root_dir = 'RAG/pipelines'
 docs = [] # Create an empty list to store the docs
 
 # Go through each folder to extract all the files
@@ -79,18 +75,18 @@ docsearch = FAISS.from_documents(docs, embeddings) # Create the FAISS index
 # source https://python.langchain.com/docs/integrations/vectorstores/faiss_async
 
 
-memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
+#memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
+RAG = RetrievalQA.from_chain_type(llm,chain_type="stuff" ,retriever=docsearch.as_retriever()) # the old chain for the retrieval
 
 
-# RAG = RetrievalQA.from_chain_type(llm, retriever=docsearch.as_retriever(),memory=memory) # the old chain for the retrieval
-RAG = ConversationalRetrievalChain.from_llm(llm,chain_type="stuff", retriever=docsearch.as_retriever(),memory=memory) # the new chain for the retrieval
+#RAG = ConversationalRetrievalChain.from_llm(llm,chain_type="stuff", retriever=docsearch.as_retriever()) # the new chain for the retrieval
 
 
 ##### this code for testing the model don't delete it --
 
 # question1 = " Hello , my name is Zain"
 # question2 = " what's my name?"
-# question3 = "I would like to use RTDIP components to read from an eventhub using ‘connection string’ as the connection string, and ‘consumer group’ as the consumer group, transform using binary to string, and edge x transformer then write to delta, return only the python code "
+#question3 = "I would like to use RTDIP components to read from an eventhub using ‘connection string’ as the connection string, and ‘consumer group’ as the consumer group, transform using binary to string, and edge x transformer then write to delta, return only the python code "
 #
 # result = RAG(question1)
 # result["answer"]
@@ -100,6 +96,6 @@ RAG = ConversationalRetrievalChain.from_llm(llm,chain_type="stuff", retriever=do
 # result["answer"]
 # print(result["answer"])
 #
-# result = RAG(question3)
-# result["answer"]
-# print(result["answer"])
+#result = RAG(question3)
+#result["answer"]
+#print(result["answer"])
