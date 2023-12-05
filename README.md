@@ -1,5 +1,5 @@
 # Pipeline Configuration Chat AI (AMOS WS23)
-![Team Logo](https://github.com/amosproj/amos2023ws05-pipeline-config-chat-ai/tree/main/Deliverables/sprint-01/team-logo.PNG)
+![Team Logo](https://github.com/amosproj/amos2023ws05-pipeline-config-chat-ai/raw/main/Deliverables/sprint-01/team-logo.PNG)
 
 ## Project Mission 
 This project is to develop a chat AI based user interface for the description and configuration of
