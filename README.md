@@ -18,7 +18,7 @@ Software Developerss: [@lyndanajjar](https://github.com/lyndanajjar), [@bergzain
 The planning document of the team is found [here](https://docs.google.com/spreadsheets/d/1m1z2m_p6k0ATw0RVNXJMbDp-RrOOPxpu0c3PPCtrwBI/edit#gid=6) 
 
 ## Prerequisites
-Enusre that you have installed:
+Ensure that you have installed:
 
 * Python version 3.11 or higher
 * Docker Desktop 
