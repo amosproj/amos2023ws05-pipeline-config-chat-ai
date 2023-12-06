@@ -26,7 +26,7 @@ assert openai_api_key is not None, "Failed to load the OpenAI API key from .env 
 
 
 llm = ChatOpenAI(model_name='gpt-3.5-turbo',openai_api_key=openai_api_key) # Load the LLM model
-set_llm_cache(InMemoryCache())
+# set_llm_cache(InMemoryCache())
 
 
 embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key) # Load the embeddings
@@ -55,7 +55,7 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 
 ##########################################  the old version of RAG
 # This is the root directory for the documents i want to create the RAG from
-root_dir = 'RAG/pipelines'
+root_dir = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines'
 docs = [] # Create an empty list to store the docs
 
 # Go through each folder to extract all the files
@@ -75,7 +75,11 @@ docsearch = FAISS.from_documents(docs, embeddings) # Create the FAISS index
 
 
 #memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
+# add caching to the memory
+
+
 RAG = RetrievalQA.from_chain_type(llm,chain_type="stuff" ,retriever=docsearch.as_retriever()) # the old chain for the retrieval
+set_llm_cache(InMemoryCache())
 
 
 #RAG = ConversationalRetrievalChain.from_llm(llm,chain_type="stuff", retriever=docsearch.as_retriever()) # the new chain for the retrieval
