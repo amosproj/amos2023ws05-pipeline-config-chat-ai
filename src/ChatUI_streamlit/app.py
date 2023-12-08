@@ -11,9 +11,7 @@ if 'page_config_set' not in st.session_state:
     st.session_state['page_config_set'] = True
 
 # Replicate Credentials
-with st.sidebar:
-    st.title('RTDIP Pipeline Generation Chatbot')
-    openai_api_key = st.text_input('Enter OpenAI API Key:', type='password')
+openai_api_key = st.text_input('Enter OpenAI API Key:', type='password')
 
 # Check if OpenAI API Key is entered
 if openai_api_key:
@@ -29,21 +27,6 @@ else:
 if "conversations" not in st.session_state.keys():
     st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
 
-# Chat history on the left
-st.sidebar.subheader('Chat History')
-
-# Button to load previous conversations
-if st.sidebar.button('Load Previous Conversations'):
-    st.sidebar.text('Select a conversation to open:')
-    selected_conversation = st.sidebar.selectbox('', range(len(st.session_state.conversations)), format_func=lambda x: st.session_state.conversations[x]["title"])
-
-    # Display the selected conversation
-    conversation = st.session_state.conversations[selected_conversation]
-    for message in conversation["messages"]:
-        with st.expander(conversation["title"]):
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
-
 # Display or clear chat messages
 for conversation in st.session_state.conversations:
     for message in conversation["messages"]:
@@ -52,7 +35,7 @@ for conversation in st.session_state.conversations:
 
 def clear_chat_history():
     st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
-st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
+#st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
 
 # User-provided prompt
