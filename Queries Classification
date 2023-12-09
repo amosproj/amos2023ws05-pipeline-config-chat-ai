@@ -11,6 +11,9 @@ Level 4: Undetermined - Sometimes the bot provides code (not necessarly correct)
 
 Easy level queries :
 
+    Q1: I would like to use RTDIP components to read from an eventhub using 'connection string' as the connection string, and 'consumer group' as the consumer group, transform using binary to string, and edge x transformer then write to delta. 
+
+    Q18: Read customer purchase history from a Parquet file, perform a customer segmentation analysis, and save the segments to a Delta Lake.
 
 
 Medium level queries :
@@ -29,6 +32,29 @@ Medium level queries :
 
 Hard level queries :
 
+    Q3: Fetch sensor data from an Azure Blob Storage in CSV format, aggregate the data on sensor ID, and save it to a SQL database.
+
+    Q4: Stream data from a MQTT broker, filter out readings below a threshold value, and store the data in Elasticsearch
+
+    Q6: Retrieve temperature data from a REST API, normalize the data, and write it into a MongoDB collection.
+
+    Q7: Connect to a Google Cloud Storage, download logs in JSON format, conduct sentiment analysis, and then store the results in a Google BigQuery table.
+
+    Q8: Stream Twitter data using API credentials, extract hashtags from tweets, and save the data into a Cassandra database.
+
+    Q10: Connect to an IoT device using MQTT protocol, apply a low-pass filter to sensor readings, and upload the filtered data to an InfluxDB instance.
+
+    Q12: Aggregate temperature and humidity data from a CSV file stored in an Azure Data Lake, calculate average values per day, and upload to a Snowflake database.
+
+    Q13: Extract stock market data from a REST API, calculate moving averages, and save the data in an Amazon Redshift cluster.
+
+    Q16: Stream social media data from a JSON file, deduplicate the entries based on user ID, and store the results in a Delta Lake.
+
+    Q21: Read weather data from a RESTful API, convert temperature from Celsius to Fahrenheit, and store the results in a JSON file.
+
+    Q22: Connect to a MySQL database, retrieve order data, group by product category, and insert the grouped data into a new table.
+
+    Q23: Extract text data from a series of PDF files stored in an SFTP server, perform named entity recognition, and index the entities in an Apache Solr collection.
 
 
 Undetermined level queries :
