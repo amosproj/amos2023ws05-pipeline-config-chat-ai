@@ -4,6 +4,8 @@ import streamlit as st
 import replicate
 import os
 import time
+from langchain.callbacks import StreamlitCallbackHandler
+
 
 # App title
 if 'page_config_set' not in st.session_state:
@@ -57,7 +59,8 @@ st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
 # User-provided prompt
 if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
-    from LLMModel import RAG as RAG
+    from LLMModel import agent
+
     if prompt := st.chat_input():
     # Get the conversation context
         conversation = st.session_state.conversations[-1]
@@ -74,17 +77,26 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
 
     # Generate a new response considering the entire conversation context
         with st.chat_message("assistant"):
+            # setip the callback handler
+            st_callback = StreamlitCallbackHandler(st.container())
+
+
             start_time = time.time()  # to calculate the time taken to generate the response
+
             with st.spinner("Generating..."):
-                response = RAG.run(prompt)
+                response = agent.run(prompt,  callbacks=[st_callback])
                 end_time = time.time()  # to calculate the time taken to generate the response
 
                 placeholder = st.empty()
                 full_response = ''
-                for item in response:
-                    full_response += item
-                    placeholder.markdown(full_response)
-                placeholder.markdown(full_response)
+                # streaming the response 
+                for chunk in response.split():
+                    full_response += chunk + " "
+                    time.sleep(0.05)
+                    # Add a blinking cursor to simulate typing
+                    placeholder.markdown(full_response + "▌")
+
+                placeholder.info(full_response)
 
     # Calculate the time taken
         response_time = end_time - start_time
