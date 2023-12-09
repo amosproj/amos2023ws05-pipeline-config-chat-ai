@@ -1,0 +1,24 @@
+Testing Queries (Based on the Bot answers):
+
+We have worked on catalog queries, found in the file  "pairs.py" and classified them into four levels:
+
+Level 1: Easy - Approximately the exact same code.
+Level 2: Medium - More than 50% of lines are the same.
+Level 3: Hard - Less than 50% similarity but with the same functionality.
+Level 4: Undetermined - Sometimes the bot provides code (not necessarly correct), sometimes not. 
+
+
+
+Easy level queries :
+
+
+
+Medium level queries :
+
+
+
+Hard level queries :
+
+
+
+Undetermined level queries :
