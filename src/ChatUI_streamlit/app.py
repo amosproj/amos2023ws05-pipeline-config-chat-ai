@@ -7,14 +7,24 @@ import time
 
 # App title
 if 'page_config_set' not in st.session_state:
-    st.set_page_config(page_title="RTDIP Pipeline Chatbot", layout="wide")
+    st.set_page_config(page_title="RTDIP Pipeline Chatbot")
     st.session_state['page_config_set'] = True
-    
-
-st.title('RTDIP Pipeline Chatbot')
+# Use HTML/CSS to position the title at the top left
+st.markdown(
+    '''
+    <style>
+        .title {
+            margin-top: -70px;
+            margin-left: -180px;
+        }
+    </style>
+    <div class="title"><h2>RTDIP Pipeline Chatbot</h2></div>
+    ''',unsafe_allow_html=True)   
+#st.title('RTDIP Pipeline Chatbot')
 # Git repository link (replace with your repository URL)
 git_repo_link = "[![Git Repository](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/rtdip/core/tree/develop)"
 st.markdown(git_repo_link, unsafe_allow_html=True)
+
 
 # Replicate Credentials
 api_key_container = st.empty()
@@ -27,7 +37,7 @@ if openai_api_key:
         os.environ['OPENAI_API_KEY'] = openai_api_key
         success_message = st.success('API Key stored!')
         # Hide success message, input field, and chat messages after 3 seconds
-        time.sleep(3)
+        time.sleep(0)
         success_message.empty()
         api_key_container.empty()
 else:
