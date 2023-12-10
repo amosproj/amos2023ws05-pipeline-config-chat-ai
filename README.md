@@ -36,7 +36,7 @@ To set up the required dependencies, create a virtual environment and run the fo
 ```
 pip install -r requirements.txt
 ```
-* Run the Application with Docker
+* Run the Application with Docker  
 Navigate to the `src` folder by using: 
 
 ``` 
@@ -60,11 +60,12 @@ Once the container is successfully running, access the application by clicking t
 
 _Note: Remember to replace <your-image-name> with the actual name you assigned to your Docker image._
 
-* Accessing the Chatbot Application
+* Accessing the Chatbot Application  
+
 Open your web browser and navigate to the presented link. The Chatbot application will be displayed, prompting you to input your OpenAI API Key. Engage in conversations by posing RTDIP-oriented questions and explore the capabilities of the application.
 
 <div style="text-align:center">
-  <img src="https://github.com/amosproj/amos2023ws05-pipeline-config-chat-ai/raw/feature-branch/UI.png" alt="UI" width="350"/>
+  <img src="https://github.com/amosproj/amos2023ws05-pipeline-config-chat-ai/raw/feature-branch/UI.png" alt="UI" width="500"/>
 </div>
 
 
