@@ -26,6 +26,10 @@ if openai_api_key:
         st.session_state['OPENAI_API_KEY'] = openai_api_key
         os.environ['OPENAI_API_KEY'] = openai_api_key
         success_message = st.success('API Key stored!')
+        # Hide success message, input field, and chat messages after 3 seconds
+        time.sleep(3)
+        success_message.empty()
+        api_key_container.empty()
 else:
         st.warning('Invalid OpenAI API Key. Please enter a valid key.')
         
