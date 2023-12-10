@@ -1,6 +1,6 @@
 Testing Queries (Based on the Bot answers):
 
-We have worked on catalog queries, found in the file  "pairs.py" and classified them into four levels:
+We have worked on catalog queries, found in the file   pairs.py  and classified them into four levels:
 
 Level 1: Easy - Approximately the exact same code.
 Level 2: Medium - More than 50% of lines are the same.
@@ -17,6 +17,16 @@ Easy level queries :
 
 
 Medium level queries :
+
+    Q2: I need to read data from Kafka using a specific bootstrap server and topic, then apply a JSON parser, and finally write the results to a Hive table.
+
+    Q9:  Load sales data from an FTP (file transfer protocol) server, perform currency conversion, and append the results to an existing Parquet file. 
+
+    Q14:  Access weather data stored in an HDFS cluster, normalize temperature readings, and store the results in an Elasticsearch index. 
+
+    Q19:  Aggregate financial transaction data from a SQL database, calculate the monthly average transaction amount, and store the results in a Delta Lake. 
+
+    Q20 : Fetch log data from an Elasticsearch index, filter logs with error severity, and archive them in a Delta Lake. ,
 
 
 
@@ -48,3 +58,11 @@ Hard level queries :
 
 
 Undetermined level queries :
+
+    Q5:  Import financial data from an S3 bucket in Parquet format, apply a standard scaler transformation, and then upload it to a Redshift database. 
+
+    Q11: Read customer feedback from a Google Sheets document, apply sentiment analysis, and store the results in a PostgreSQL database for further analysis. 
+
+    Q15: Load sales records from a MongoDB collection, filter out records with sales below $500, and export the data to a CSV file. 
+
+    Q17:  Load IoT sensor data from a CSV file, apply a smoothing filter to the readings, and write to a Delta Lake for time-series analysis.
