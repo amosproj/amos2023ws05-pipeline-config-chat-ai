@@ -5,44 +5,43 @@ import replicate
 import os
 import time
 
+
+
 # App title
 if 'page_config_set' not in st.session_state:
-    st.set_page_config(page_title="RTDIP PipeLine Chatbot")
+    st.set_page_config(page_title="RTDIP Pipeline Chatbot")
     st.session_state['page_config_set'] = True
 
+# Use HTML/CSS to position the title and GitHub link on the same line
+st.markdown(
+    '''
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="margin-top: -70px; margin-left: -180px;"><h2>RTDIP Pipeline Chatbot</h2></div>
+        <div style="margin-top: -70px; "><a href="https://github.com/rtdip/core/tree/develop"><img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github"></a></div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+
 # Replicate Credentials
-with st.sidebar:
-    st.title('RTDIP Pipeline Generation Chatbot')
-    openai_api_key = st.text_input('Enter OpenAI API Key:', type='password')
+api_key_container = st.empty()
+openai_api_key = api_key_container.text_input('Enter OpenAI API Key:', type='password')
 
 # Check if OpenAI API Key is entered
 if openai_api_key:
-    # Store the API key in the session state or environment variable
-    st.session_state['OPENAI_API_KEY'] = openai_api_key
-    os.environ['OPENAI_API_KEY'] = openai_api_key
-    st.success('API Key stored!')
+        # Store the API key in the session state 
+        st.session_state['OPENAI_API_KEY'] = openai_api_key
+        os.environ['OPENAI_API_KEY'] = openai_api_key
+        success_message = st.success('API Key stored!')
+        # Hide success message, input field, and chat messages after 3 seconds
+        time.sleep(0)
+        success_message.empty()
+        api_key_container.empty()
 else:
-    st.warning('Please enter your OpenAI API Key to proceed.')
-
-
+        st.warning('Invalid OpenAI API Key. Please enter a valid key.')
+        
 # Store LLM generated responses
 if "conversations" not in st.session_state.keys():
     st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
-
-# Chat history on the left
-st.sidebar.subheader('Chat History')
-
-# Button to load previous conversations
-if st.sidebar.button('Load Previous Conversations'):
-    st.sidebar.text('Select a conversation to open:')
-    selected_conversation = st.sidebar.selectbox('', range(len(st.session_state.conversations)), format_func=lambda x: st.session_state.conversations[x]["title"])
-
-    # Display the selected conversation
-    conversation = st.session_state.conversations[selected_conversation]
-    for message in conversation["messages"]:
-        with st.expander(conversation["title"]):
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
 
 # Display or clear chat messages
 for conversation in st.session_state.conversations:
@@ -52,7 +51,7 @@ for conversation in st.session_state.conversations:
 
 def clear_chat_history():
     st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
-st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
+#st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
 
 # User-provided prompt
@@ -78,7 +77,6 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
             with st.spinner("Generating..."):
                 response = RAG.run(prompt)
                 end_time = time.time()  # to calculate the time taken to generate the response
-
                 placeholder = st.empty()
                 full_response = ''
                 for item in response:
