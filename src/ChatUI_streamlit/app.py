@@ -5,25 +5,21 @@ import replicate
 import os
 import time
 
+
+
 # App title
 if 'page_config_set' not in st.session_state:
     st.set_page_config(page_title="RTDIP Pipeline Chatbot")
     st.session_state['page_config_set'] = True
-# Use HTML/CSS to position the title at the top left
+
+# Use HTML/CSS to position the title and GitHub link on the same line
 st.markdown(
     '''
-    <style>
-        .title {
-            margin-top: -70px;
-            margin-left: -180px;
-        }
-    </style>
-    <div class="title"><h2>RTDIP Pipeline Chatbot</h2></div>
-    ''',unsafe_allow_html=True)   
-#st.title('RTDIP Pipeline Chatbot')
-# Git repository link (replace with your repository URL)
-git_repo_link = "[![Git Repository](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/rtdip/core/tree/develop)"
-st.markdown(git_repo_link, unsafe_allow_html=True)
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="margin-top: -70px; margin-left: -180px;"><h2>RTDIP Pipeline Chatbot</h2></div>
+        <div style="margin-top: -70px; "><a href="https://github.com/rtdip/core/tree/develop"><img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github"></a></div>
+    </div>
+    ''', unsafe_allow_html=True)
 
 
 # Replicate Credentials
