@@ -18,8 +18,7 @@ from langchain.agents import AgentType, Tool, initialize_agent
 from langchain.memory import ConversationBufferMemory
 from langchain.agents import AgentExecutor
 
-# openai_api_key = os.environ["OPENAI_API_KEY"]
-openai_api_key = "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"
+openai_api_key = os.environ["OPENAI_API_KEY"]
 
 
 
@@ -67,7 +66,7 @@ tools = [
 
 # Initializing Agent
 agent = initialize_agent(
-    tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True, memory=ConversationBufferMemory()
+    tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True, memory=ConversationBufferMemory(),handle_parsing_errors=True
 )
 set_llm_cache(InMemoryCache())
 
