@@ -59,7 +59,7 @@ st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
 # User-provided prompt
 if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
-    from LLMModel import agent
+    from LLMModel import agent_executor
 
     if prompt := st.chat_input():
     # Get the conversation context
