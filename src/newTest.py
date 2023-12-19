@@ -48,15 +48,14 @@ num_transformers = len(transformer_names)
 num_destinations = len(filtered_destinations)
 
 combinations = list(itertools.product(filtered_sources, transformer_names, filtered_destinations))
-output_file_path = "output_queries.txt"
+
 query_template = "I would like to use RTDIP components to read from  {source} ,  transform using {transformer}  then write to {destination}"
 
 num_queries= 0
-with open(output_file_path, "w") as output_file:
-    for combo in combinations:
-        query = query_template.format(source=combo[0], transformer=combo[1], destination=combo[2])
-        output_file.write(f"Query {num_queries + 1}: {query}\n")
-        num_queries += 1
+for combo in combinations:
+    query = query_template.format(source= combo[0],transformer=combo[1], destination=combo[2])
+    print(query)
+    num_queries += 1
 
 print(f"\nTotal number of queries: {num_queries}")
 print(f"Number of sources: {num_sources}")
