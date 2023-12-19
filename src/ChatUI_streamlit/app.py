@@ -57,6 +57,25 @@ def clear_chat_history():
 st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
 
+
+def parse_response(model_response):
+    # Find all code blocks in the response
+    code_blocks = model_response.split("```")
+    
+    # Check if there is at least one code block
+    if len(code_blocks) > 1:
+        for i in range(1, len(code_blocks), 2):
+            st.code(code_blocks[i], language="python")
+            if i + 1 < len(code_blocks):
+                parsed_output = code_blocks[i + 1].capitalize() + "."  # Capitalize the first letter and add a period at the end
+                #st.write(parsed_output)
+    else:
+        # Basic formatting: capitalize the first letter and add a period at the end
+        parsed_output = model_response.capitalize() + "."
+        #st.write(parsed_output)
+
+    return parsed_output  # Return the parsed output
+
 # User-provided prompt
 if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
     from LLMModel import agent
@@ -84,26 +103,29 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
             start_time = time.time()  # to calculate the time taken to generate the response
 
             with st.spinner("Generating..."):
-                response = agent.run(prompt,  callbacks=[st_callback])
-                end_time = time.time()  # to calculate the time taken to generate the response
-
                 placeholder = st.empty()
                 full_response = ''
-                # streaming the response 
-                for chunk in response.split():
+                # streaming the response
+                for chunk in agent.run(prompt, callbacks=[st_callback]).split():
                     full_response += chunk + " "
                     time.sleep(0.05)
                     # Add a blinking cursor to simulate typing
                     placeholder.markdown(full_response + "▌")
 
-                placeholder.info(full_response)
+                    # Parse and display the current response
+                    parsed_response = parse_response(full_response)
+                    #placeholder.info(parsed_response)
+
+        # End the streaming and display the final parsing
+        #st.write(parsed_response)
+
 
     # Calculate the time taken
-        response_time = end_time - start_time
+        response_time = time.time() - start_time
         st.write(f"Response generated in {response_time:.2f} seconds.")
 
     # Add the assistant's response to the conversation
-        message = {"role": "assistant", "content": full_response}
+        message = {"role": "assistant", "content": parsed_response}
         conversation["messages"].append(message)
     
     
