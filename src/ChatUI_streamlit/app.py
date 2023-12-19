@@ -4,8 +4,31 @@ import streamlit as st
 import replicate
 import os
 import time
+import requests
+import openai
+class InvalidAPIKeyException(Exception):
+    pass
 
+# Function to check API key validity
+def is_valid_api_key(key):
+    # Using the endpoint to list available models
+    url = "https://api.openai.com/v1/models/gpt-3.5-turbo-instruct"
 
+    headers = {
+        "Authorization": f"Bearer {key}"
+    }
+
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            # If the request is successful, the API key is valid
+            return True
+        else:
+            # If the request fails, the API key is likely invalid
+            return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
 
 # App title
 if 'page_config_set' not in st.session_state:
@@ -28,16 +51,19 @@ openai_api_key = api_key_container.text_input('Enter OpenAI API Key:', type='pas
 
 # Check if OpenAI API Key is entered
 if openai_api_key:
-        # Store the API key in the session state 
-        st.session_state['OPENAI_API_KEY'] = openai_api_key
-        os.environ['OPENAI_API_KEY'] = openai_api_key
-        success_message = st.success('API Key stored!')
-        # Hide success message, input field, and chat messages after 3 seconds
-        time.sleep(0)
-        success_message.empty()
-        api_key_container.empty()
-else:
-        st.warning('Invalid OpenAI API Key. Please enter a valid key.')
+    try:
+        if is_valid_api_key(openai_api_key):
+            # Store the API key in the session state 
+            st.session_state['OPENAI_API_KEY'] = openai_api_key
+            os.environ['OPENAI_API_KEY'] = openai_api_key
+            success_message = st.success('API Key stored!')
+            time.sleep(3)
+            success_message.empty()
+            api_key_container.empty()
+        else:
+            raise InvalidAPIKeyException
+    except InvalidAPIKeyException:
+        st.error('Invalid OpenAI API Key. Please enter a valid key.')
         
 # Store LLM generated responses
 if "conversations" not in st.session_state.keys():
