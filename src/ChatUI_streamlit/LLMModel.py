@@ -55,7 +55,7 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 
 ##########################################  the old version of RAG
 # This is the root directory for the documents i want to create the RAG from
-root_dir = '../../RAG/pipelines'
+root_dir = os.path.join("..", "RAG")
 docs = [] # Create an empty list to store the docs
 
 # Go through each folder to extract all the files
