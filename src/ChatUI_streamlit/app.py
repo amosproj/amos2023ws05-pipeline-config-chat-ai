@@ -1,41 +1,29 @@
-
-# app
 import streamlit as st
-import replicate
 import os
 import time
 import requests
 import openai
+
 class InvalidAPIKeyException(Exception):
     pass
 
 # Function to check API key validity
 def is_valid_api_key(key):
-    # Using the endpoint to list available models
     url = "https://api.openai.com/v1/models/gpt-3.5-turbo-instruct"
-
-    headers = {
-        "Authorization": f"Bearer {key}"
-    }
-
+    headers = {"Authorization": f"Bearer {key}"}
     try:
         response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            # If the request is successful, the API key is valid
-            return True
-        else:
-            # If the request fails, the API key is likely invalid
-            return False
+        return response.status_code == 200
     except Exception as e:
         print(f"An error occurred: {e}")
         return False
 
-# App title
+# Initialize page configuration once
 if 'page_config_set' not in st.session_state:
     st.set_page_config(page_title="RTDIP Pipeline Chatbot")
     st.session_state['page_config_set'] = True
 
-# Use HTML/CSS to position the title and GitHub link on the same line
+# HTML/CSS for title and GitHub link
 st.markdown(
     '''
     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -44,27 +32,21 @@ st.markdown(
     </div>
     ''', unsafe_allow_html=True)
 
+# Check if the OpenAI API key is already stored in the session
+if 'OPENAI_API_KEY' not in st.session_state:
+    # If not, ask the user to input it
+    openai_api_key = st.text_input('Enter OpenAI API Key:', type='password')
+    if openai_api_key:
+        try:
+            if is_valid_api_key(openai_api_key):
+                st.session_state['OPENAI_API_KEY'] = openai_api_key
+                os.environ['OPENAI_API_KEY'] = openai_api_key
+                st.success('API Key stored!')
+            else:
+                raise InvalidAPIKeyException
+        except InvalidAPIKeyException:
+            st.error('Invalid OpenAI API Key. Please enter a valid key.')
 
-# Replicate Credentials
-api_key_container = st.empty()
-openai_api_key = api_key_container.text_input('Enter OpenAI API Key:', type='password')
-
-# Check if OpenAI API Key is entered
-if openai_api_key:
-    try:
-        if is_valid_api_key(openai_api_key):
-            # Store the API key in the session state 
-            st.session_state['OPENAI_API_KEY'] = openai_api_key
-            os.environ['OPENAI_API_KEY'] = openai_api_key
-            success_message = st.success('API Key stored!')
-            time.sleep(3)
-            success_message.empty()
-            api_key_container.empty()
-        else:
-            raise InvalidAPIKeyException
-    except InvalidAPIKeyException:
-        st.error('Invalid OpenAI API Key. Please enter a valid key.')
-        
 # Store LLM generated responses
 if "conversations" not in st.session_state.keys():
     st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
@@ -75,48 +57,27 @@ for conversation in st.session_state.conversations:
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-def clear_chat_history():
-    st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
-#st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
-
-
 # User-provided prompt
 if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
     from LLMModel import RAG as RAG
     if prompt := st.chat_input():
-    # Get the conversation context
         conversation = st.session_state.conversations[-1]
-    
-    # Use the entire conversation context as input
-        #context = "\n".join([message["content"] for message in conversation["messages"]])
-    
-    # Add the user's input to the conversation
+        context = "\n".join([message["content"] for message in conversation["messages"]])
         conversation["messages"].append({"role": "user", "content": prompt})
-
-    # Display user's input in the chat
         with st.chat_message("user"):
             st.write(prompt)
-
-    # Generate a new response considering the entire conversation context
         with st.chat_message("assistant"):
-            start_time = time.time()  # to calculate the time taken to generate the response
+            start_time = time.time()
             with st.spinner("Generating..."):
-                response = RAG.run(prompt)
-                end_time = time.time()  # to calculate the time taken to generate the response
+                response = RAG.run(context + "\n" + prompt)
+                end_time = time.time()
                 placeholder = st.empty()
                 full_response = ''
                 for item in response:
                     full_response += item
                     placeholder.markdown(full_response)
                 placeholder.markdown(full_response)
-
-    # Calculate the time taken
         response_time = end_time - start_time
         st.write(f"Response generated in {response_time:.2f} seconds.")
-
-    # Add the assistant's response to the conversation
         message = {"role": "assistant", "content": full_response}
         conversation["messages"].append(message)
-    
-    
-
