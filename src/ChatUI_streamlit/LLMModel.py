@@ -26,63 +26,55 @@ import faiss
 openai_api_key = os.environ["OPENAI_API_KEY"]
 assert openai_api_key is not None, "Failed to load the OpenAI API key from .env file. Please create .env file and add OPENAI_API_KEY = 'your key'"
 
+# Initialize the language model
+llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai_api_key)
 
+# Load the embeddings
+embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key)
 
+# # Load and split documents
+# root_dir = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines'
+# docs = []
+# for dirpath, dirnames, filenames in os.walk(root_dir):
+#     for file in filenames:
+#         try:
+#             loader = TextLoader(os.path.join(dirpath, file), encoding='utf-8')
+#             docs.extend(loader.load_and_split())
+#         except Exception as e:
+#             pass  # Consider logging the exception for debugging
 
-llm = ChatOpenAI(model_name='gpt-3.5-turbo',openai_api_key=openai_api_key) # Load the LLM model
-# set_llm_cache(InMemoryCache())
+# # Create the FAISS index
+# docsearch = FAISS.from_documents(docs, embeddings)
 
+#%%
+# save the vector store offline for later use
+# faiss.write_index(docsearch.index, '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index_file')
+# docsearch.save_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index")
 
-embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key) # Load the embeddings
-#
-# # This is the root directory for the documents i want to create the RAG from
-# repo_path = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG'
-# loader = GenericLoader.from_filesystem(
-#     repo_path,
-#     glob="**/*",
-#     suffixes=[".py"],
-#     parser=LanguageParser(language=Language.PYTHON, parser_threshold=500),
-# )
-# documents = loader.load()
-#
-# python_splitter = RecursiveCharacterTextSplitter.from_language(
-#     language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
-# )
-# texts = python_splitter.split_documents(documents)
-#
-#
-# db = Chroma.from_documents(texts, OpenAIEmbeddings(disallowed_special=()))
-# retriever = db.as_retriever(
-#     search_type="mmr",  # Also test "similarity"
-#     search_kwargs={"k": 8},
-# )
+#%%
+docsearch = FAISS.load_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index", embeddings)
+#%%
+# Initialize RetrievalQA
+RAG = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=docsearch.as_retriever())
 
-##########################################  the old version of RAG
-# This is the root directory for the documents i want to create the RAG from
-root_dir = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines'
-docs = [] # Create an empty list to store the docs
+# Define tools
+tools = [
+    Tool(
+        name="RTDIP SDK",
+        func=RAG.run,
+        description="useful for when you need to answer questions about RTDIP",
+    )
+]
 
-# Go through each folder to extract all the files
-for dirpath, dirnames, filenames in os.walk(root_dir):
+# Initialize conversation memory
+conversation_memory = ConversationBufferMemory()
 
-    # Go through each file
-    for file in filenames:
-        try:
-            # Load up the file as a doc and split
-            loader = TextLoader(os.path.join(dirpath, file), encoding='utf-8')
-            docs.extend(loader.load_and_split())
-        except Exception as e:
-            pass
+# Initialize Agent with conversation memory
+agent = initialize_agent(
+    tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True, memory=conversation_memory, handle_parsing_errors=True
+)
 
-docsearch = FAISS.from_documents(docs, embeddings) # Create the FAISS index
-# source https://python.langchain.com/docs/integrations/vectorstores/faiss_async
-
-
-#memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
-# add caching to the memory
-
-
-RAG = RetrievalQA.from_chain_type(llm,chain_type="stuff" ,retriever=docsearch.as_retriever()) # the old chain for the retrieval
+# Set the LLM cache
 set_llm_cache(InMemoryCache())
 
 # Function to update and retrieve conversation context
