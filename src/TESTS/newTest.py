@@ -10,7 +10,7 @@ def extract_names(folder_path, exclude_names=None):
         for file in files:
             # Exclude files with ‘interface’ in the name and ‘_init_.py’
             if (file.endswith(".py") and "interface" not in file 
-                and file not in exclude_names and file != "_init_.py"):
+                and file not in exclude_names and file != "__init__.py"):
                 file_path = os.path.join(root, file)
                 with open(file_path, "r") as f:
                     content = f.read()
@@ -32,16 +32,13 @@ source_names = extract_names(sources_folder, exclude_names)
 transformer_names = extract_names(transformers_folder, exclude_names)
 destination_names = extract_names(destinations_folder, exclude_names)
 
-
-def filter_components(source_list,  destination_list):
+def filter_components(source_list, destination_list):
     # Filter out elements that do not end with the specified suffix
     source_list = [source for source in source_list if source.endswith("Source")]
     destination_list = [destination for destination in destination_list if destination.endswith("Destination")]
     return source_list, destination_list
 
-
-filtered_sources,  filtered_destinations = filter_components(source_names, destination_names)
-
+filtered_sources, filtered_destinations = filter_components(source_names, destination_names)
 
 num_sources = len(filtered_sources)
 num_transformers = len(transformer_names)
@@ -49,15 +46,19 @@ num_destinations = len(filtered_destinations)
 
 combinations = list(itertools.product(filtered_sources, transformer_names, filtered_destinations))
 
-query_template = "I would like to use RTDIP components to read from  {source} ,  transform using {transformer}  then write to {destination}"
+query_template = "I would like to use RTDIP components to read from {source}, transform using {transformer}, then write to {destination}"
 
-num_queries= 0
-for combo in combinations:
-    query = query_template.format(source= combo[0],transformer=combo[1], destination=combo[2])
-    print(query)
-    num_queries += 1
+output_file_path = "output_queries.txt"
+num_queries = 0
 
-print(f"\nTotal number of queries: {num_queries}")
+with open(output_file_path, "w") as output_file:
+    for combo in combinations:
+        query = query_template.format(source=combo[0], transformer=combo[1], destination=combo[2])
+        output_file.write(f"Query {num_queries + 1}: {query}\n")
+        num_queries += 1
+
+print(f"Queries have been written to {output_file_path}")
+print(f"Total number of queries: {num_queries}")
 print(f"Number of sources: {num_sources}")
 print(f"Number of transformers: {num_transformers}")
 print(f"Number of destinations: {num_destinations}")
