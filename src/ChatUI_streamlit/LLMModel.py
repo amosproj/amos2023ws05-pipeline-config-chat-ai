@@ -52,7 +52,7 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 # docsearch.save_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index")
 
 #%%
-docsearch = FAISS.load_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index", embeddings)
+docsearch = FAISS.load_local("faiss_index", embeddings)
 #%%
 # Initialize RetrievalQA
 RAG = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=docsearch.as_retriever())
