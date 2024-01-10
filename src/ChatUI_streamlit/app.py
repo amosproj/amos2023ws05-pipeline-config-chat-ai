@@ -54,6 +54,15 @@ st.markdown(
 
 
 
+# Create columns for layout
+left_col, right_col = st.columns([3, 1])  
+
+with right_col:
+    if st.button('Update RAG'):
+        run_update_script()
+
+with left_col:
+    st.write("")  
 
 # Check if the OpenAI API key is already stored in the session
 if 'OPENAI_API_KEY' not in st.session_state:
