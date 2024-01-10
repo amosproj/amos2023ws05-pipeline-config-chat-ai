@@ -3,6 +3,9 @@ import os
 import time
 import requests
 import openai
+import subprocess
+from datetime import datetime
+
 
 class InvalidAPIKeyException(Exception):
     pass
@@ -18,6 +21,23 @@ def is_valid_api_key(key):
         print(f"An error occurred: {e}")
         return False
 
+
+def run_update_script():
+    script_path = '../UpdateRAG/updateRAG.py'
+    absolute_script_path = os.path.join(os.getcwd(), script_path)
+    command = f'python "{absolute_script_path}"'
+    
+    try:
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        st.success("Successfully updated RAG.")
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        st.error(f"Failed to update RAG. Error: {e.stderr}")
+        return e.stderr
+
+
+    
+
 # Initialize page configuration once
 if 'page_config_set' not in st.session_state:
     st.set_page_config(page_title="RTDIP Pipeline Chatbot")
@@ -31,6 +51,9 @@ st.markdown(
         <div style="margin-top: -70px; "><a href="https://github.com/rtdip/core/tree/develop"><img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github"></a></div>
     </div>
     ''', unsafe_allow_html=True)
+
+
+
 
 # Check if the OpenAI API key is already stored in the session
 if 'OPENAI_API_KEY' not in st.session_state:
