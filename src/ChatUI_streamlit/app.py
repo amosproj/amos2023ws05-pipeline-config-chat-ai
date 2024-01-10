@@ -37,6 +37,18 @@ def run_update_script():
 
 
     
+    
+def get_last_modified_time(folder_path):
+    latest_mod_time = 0
+    for root, _, files in os.walk(folder_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                file_mod_time = os.path.getmtime(file_path)
+                latest_mod_time = max(latest_mod_time, file_mod_time)
+            except Exception as e:
+                pass
+    return datetime.fromtimestamp(latest_mod_time).strftime("%Y-%m-%d %H:%M") if latest_mod_time else None
 
 # Initialize page configuration once
 if 'page_config_set' not in st.session_state:
@@ -53,16 +65,19 @@ st.markdown(
     ''', unsafe_allow_html=True)
 
 
+rag_folder_path = os.path.join("..", "RAG")
 
-# Create columns for layout
+last_modified_time = get_last_modified_time(rag_folder_path)
+
 left_col, right_col = st.columns([3, 1])  
 
 with right_col:
     if st.button('Update RAG'):
         run_update_script()
+    st.caption(f"Last update: {last_modified_time}")  
 
 with left_col:
-    st.write("")  
+    st.write("")  # This will create space and push the button and text to the right
 
 # Check if the OpenAI API key is already stored in the session
 if 'OPENAI_API_KEY' not in st.session_state:
