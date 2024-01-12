@@ -48,7 +48,7 @@ def get_last_modified_time(folder_path):
                 latest_mod_time = max(latest_mod_time, file_mod_time)
             except Exception as e:
                 pass
-    return datetime.fromtimestamp(latest_mod_time).strftime("%Y-%m-%d %H:%M") if latest_mod_time else None
+    return datetime.fromtimestamp(latest_mod_time).strftime("%Y-%m-%d") if latest_mod_time else None
 
 # Initialize page configuration once
 if 'page_config_set' not in st.session_state:
@@ -72,9 +72,22 @@ last_modified_time = get_last_modified_time(rag_folder_path)
 left_col, right_col = st.columns([3, 1])  
 
 with right_col:
+    button_style = """
+    <style>
+    .stButton>button {
+       max-width: 200px;  /* Maximum button width */
+    margin-left: 45px; 
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    }
+    </style>
+    """
+    st.markdown(button_style, unsafe_allow_html=True)
     if st.button('Update RAG'):
         run_update_script()
     st.caption(f"Last update: {last_modified_time}")  
+    
 
 with left_col:
     st.write("")  # This will create space and push the button and text to the right
