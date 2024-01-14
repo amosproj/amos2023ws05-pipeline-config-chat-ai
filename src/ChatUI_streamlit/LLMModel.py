@@ -96,6 +96,10 @@ db = Chroma.from_documents(texts, OpenAIEmbeddings(disallowed_special=(),openai_
 # this will save and load the vector store from local folder
 # db = Chroma(persist_directory="/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/chroma_index")
 
+retriver2 = db.as_retriever(
+    search_type="mmr",  # Also test "similarity"
+    search_kwargs={"k": 8},
+)
 
 #%%
 
