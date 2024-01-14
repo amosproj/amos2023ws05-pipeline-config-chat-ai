@@ -91,6 +91,11 @@ python_splitter = RecursiveCharacterTextSplitter.from_language(
 texts = python_splitter.split_documents(documents)
 len(texts)
 
+#%%
+db = Chroma.from_documents(texts, OpenAIEmbeddings(disallowed_special=(),openai_api_key=openai_api_key))
+# this will save and load the vector store from local folder
+# db = Chroma(persist_directory="/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/chroma_index")
+
 
 #%%
 
