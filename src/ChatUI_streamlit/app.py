@@ -75,9 +75,8 @@ with right_col:
     button_style = """
     <style>
     .stButton>button {
-       max-width: 200px;  /* Maximum button width */
+       max-width: 200px;  
     margin-left: 45px; 
-    color: white;
     padding: 5px 10px;
     border-radius: 15px;
     }
