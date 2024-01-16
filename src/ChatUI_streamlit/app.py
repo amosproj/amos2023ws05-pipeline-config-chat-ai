@@ -140,8 +140,13 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         st.write(f"Response generated in {response_time:.2f} seconds.")
         message = {"role": "assistant", "content": full_response}
         conversation["messages"].append(message)
-   
-    if st.button("New Conversation"):
+        
+    if 'run_button' in st.session_state and st.session_state.run_button == True:
+        st.session_state.running = True
+    else:
+        st.session_state.running = False
+
+    if st.button("New Conversation", disabled=st.session_state.running, key='run_button'):
         # Clear chat messages
         st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
         # Trigger a rerun
