@@ -6,46 +6,60 @@ import openai
 import subprocess
 from datetime import datetime
 import csv
+import sqlite3
+
 
 class InvalidAPIKeyException(Exception):
     pass
 
-def save_to_csv(conversation, filename='convers_data_nosession_idx.csv'):
-    # Check if the file already exists
-    file_exists = os.path.isfile(filename)
-    with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
-        #fieldnames = ['session_index', 'conversation_index', 'conversation_title', 'role', 'content']
-        fieldnames = [ 'conversation_index', 'conversation_title', 'role', 'content']
+# Function to initialize the database
+def initialize_database():
+    connection = sqlite3.connect("conversations.db")
+    cursor = connection.cursor()
 
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    # Create a table for conversations
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS conversations (
+                id INTEGER PRIMARY KEY,
+                title TEXT,
+                role TEXT,
+                content TEXT, 
+                conversation_index INTEGER
+            )
+        ''')
 
-        # Write header only if the file is newly created
-        if not file_exists:
-            writer.writeheader()
+    connection.commit()
+    connection.close()
 
-        # Get the session index and conversation index counters
-        #session_index = st.session_state.get('session_index', 0)
-        conversation_index = st.session_state.get('conversation_index', 0)
+def save_to_database(conversation):
+    connection = sqlite3.connect("conversations.db")
+    cursor = connection.cursor()
 
-        # Get the last saved index or timestamp for the conversation
-        last_saved_index = st.session_state.get('last_saved_index', -1)
+    # Get the conversation title and conversation index
+    conversation_title = conversation["title"]
+    conversation_index = conversation["messages"][-1]["conversation_index"]
 
-        # Save messages from the last saved index to the end of the conversation
-        for idx, message in enumerate(conversation["messages"][last_saved_index + 1:]):
-            writer.writerow({
-                #'session_index': session_index,
-                'conversation_index': conversation_index,
-                'conversation_title': conversation["title"],
-                'role': message["role"],
-                'content': message["content"]
-            })
+    # Save only the new messages since the last saved index
+    for idx, message in enumerate(conversation["messages"][st.session_state.last_saved_index + 1:]):
+        cursor.execute('''
+            INSERT INTO conversations (title, role, content, conversation_index) VALUES (?, ?, ?, ?)
+        ''', (conversation_title, message["role"], message["content"], conversation_index))
 
-        # Update the last saved index to the latest message
-        st.session_state['last_saved_index'] = len(conversation["messages"]) - 1
-                
-                
+    connection.commit()
+    connection.close()
+
+    # Update the last saved index for this conversation
+    st.session_state.last_saved_index = len(conversation["messages"]) - 1
+
+
+
 def generate_unique_title():
     return f"Conversation_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
+# Save the conversation to the database instead of CSV
+def save_conversation(conversation):
+    save_to_database(conversation)
+
 
 # Function to check API key validity
 def is_valid_api_key(key):
@@ -89,6 +103,13 @@ def get_last_modified_time(folder_path):
 if 'page_config_set' not in st.session_state:
     st.set_page_config(page_title="RTDIP Pipeline Chatbot")
     st.session_state['page_config_set'] = True
+
+if 'last_saved_index' not in st.session_state:
+    st.session_state.last_saved_index = -1
+
+# Initialize conversation index once
+if 'conversation_index' not in st.session_state:
+    st.session_state.conversation_index = 0
 
 # HTML/CSS for title and GitHub link
 st.markdown(
@@ -144,6 +165,8 @@ if 'OPENAI_API_KEY' not in st.session_state:
 # Store LLM generated responses
 if "conversations" not in st.session_state.keys():
     st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
+# Initialize the database once
+initialize_database()
 
 # Display or clear chat messages
 for conversation in st.session_state.conversations:
@@ -157,9 +180,16 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
     if prompt := st.chat_input():
         conversation = st.session_state.conversations[-1]
         context = "\n".join([message["content"] for message in conversation["messages"]])
-        conversation["messages"].append({"role": "user", "content": prompt})
+        
+        # Reset conversation index to 0 for a new conversation
+        conversation_index = 0 if not st.session_state.get('conversation_index') else st.session_state.conversation_index
+        
+        # Use the reset conversation index
+        conversation["messages"].append({"role": "user", "content": prompt, "conversation_index": conversation_index})
+
         with st.chat_message("user"):
             st.write(prompt)
+        
         with st.chat_message("assistant"):
             start_time = time.time()
             with st.spinner("Generating..."):
@@ -171,16 +201,24 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
                     full_response += item
                     placeholder.markdown(full_response)
                 placeholder.markdown(full_response)
+
         response_time = end_time - start_time
         st.write(f"Response generated in {response_time:.2f} seconds.")
+        
+        # Update conversation index for both user and assistant messages : wrong
+        #st.session_state.conversation_index += 1
+        
         # Generate a unique conversation title
         new_title = generate_unique_title()
         st.session_state.conversations[-1]["title"] = new_title
-        message = {"role": "assistant", "content": full_response}
-        conversation["messages"].append(message)
-        # Save the conversation to CSV
-        save_to_csv(conversation)
         
+        # Set conversation_index for the assistant message
+        message = {"role": "assistant", "content": full_response, "conversation_index": st.session_state.conversation_index}
+        conversation["messages"].append(message)
+        
+        # Save the conversation to the database
+        save_conversation(conversation)
+
     if 'run_button' in st.session_state and st.session_state.run_button == True:
         st.session_state.running = True
     else:
@@ -188,14 +226,11 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
 
     if st.button("New Conversation", disabled=st.session_state.running, key='run_button'):
         # Increment conversation index when starting a new conversation
-        st.session_state.conversation_index = st.session_state.get('conversation_index', 0) + 1
+        st.session_state.conversation_index += 1
+
         # Clear chat messages
         st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
         st.session_state.last_saved_index = -1
 
         # Trigger a rerun
         st.rerun()
-    
-    #with st.sidebar():
-    #    st.session_state.conversations 
-
