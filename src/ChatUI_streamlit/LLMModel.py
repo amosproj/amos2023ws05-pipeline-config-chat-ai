@@ -3,25 +3,35 @@ import os
 from langchain.chains import RetrievalQA
 from langchain.cache import InMemoryCache
 from langchain.globals import set_llm_cache
-from langchain.document_loaders.generic import GenericLoader
-from langchain.document_loaders.parsers import LanguageParser
-from langchain.text_splitter import Language
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
-from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationSummaryMemory
 from langchain.vectorstores import FAISS
-from langchain.document_loaders.text import TextLoader
 from langchain.agents import AgentType, Tool, initialize_agent
 from langchain.memory import ConversationBufferMemory
-from langchain.agents import AgentExecutor
-# import faiss
-from langchain.vectorstores import FAISS as FAISS
-import faiss 
+from langchain.memory import ConversationSummaryMemory
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma as Chroma
+from langchain.retrievers.merger_retriever import MergerRetriever
+from langchain_community.document_transformers import (
+    EmbeddingsClusteringFilter,
+    EmbeddingsRedundantFilter,
+)
+from langchain.retrievers.document_compressors import DocumentCompressorPipeline
+from langchain.retrievers import ContextualCompressionRetriever
 
+from dotenv import load_dotenv
+
+from langchain.chains import ConversationalRetrievalChain
+
+
+from langchain.text_splitter import Language
+from langchain_community.document_loaders.generic import GenericLoader
+from langchain_community.document_loaders.parsers import LanguageParser
+
+#%%
 # Load the OpenAI API key
+load_dotenv()
 
 openai_api_key = os.environ["OPENAI_API_KEY"]
 assert openai_api_key is not None, "Failed to load the OpenAI API key from .env file. Please create .env file and add OPENAI_API_KEY = 'your key'"
@@ -32,6 +42,8 @@ llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai_api_key)
 # Load the embeddings
 embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key)
 
+
+##### first content store using faiss
 # # Load and split documents
 # root_dir = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines'
 # docs = []
@@ -52,27 +64,53 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 # docsearch.save_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index")
 
 #%%
-docsearch = FAISS.load_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index", embeddings)
+# docsearch = FAISS.load_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index", embeddings)
+# retriver1= docsearch.as_retriever()
+
 #%%
 # Initialize RetrievalQA
-RAG = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=docsearch.as_retriever())
 
-# Define tools
-tools = [
-    Tool(
-        name="RTDIP SDK",
-        func=RAG.run,
-        description="useful for when you need to answer questions about RTDIP",
-    )
-]
 
-# Initialize conversation memory
-conversation_memory = ConversationBufferMemory()
+#%%
+############### second content store using chroma
 
-# Initialize Agent with conversation memory
-agent = initialize_agent(
-    tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True, memory=conversation_memory, handle_parsing_errors=True
+loader = GenericLoader.from_filesystem(
+    "/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG",
+    glob="**/*",
+    suffixes=[".py"],
+    exclude=["**/non-utf8-encoding.py"],
+    parser=LanguageParser(language=Language.PYTHON, parser_threshold=500),
 )
+documents = loader.load()
+len(documents)
+#%%
+
+python_splitter = RecursiveCharacterTextSplitter.from_language(
+    language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
+)
+texts = python_splitter.split_documents(documents)
+len(texts)
+
+#%%
+db = Chroma.from_documents(texts, OpenAIEmbeddings(disallowed_special=(),openai_api_key=openai_api_key))
+# this will save and load the vector store from local folder
+# db = Chroma(persist_directory="/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/chroma_index")
+
+retriver2 = db.as_retriever(
+    search_type="mmr",  # Also test "similarity"
+    search_kwargs={"k": 8},
+)
+
+#%%
+
+memory = ConversationSummaryMemory(
+    llm=llm, memory_key="chat_history", return_messages=True
+)
+
+RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriver2, memory=memory)
+
+
+# RAG = RetrievalQA.from_chain_type(llm, chain_type="stuff", retriever=retriver2)
 
 # Set the LLM cache
 set_llm_cache(InMemoryCache())
