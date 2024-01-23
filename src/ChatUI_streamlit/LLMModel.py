@@ -82,6 +82,10 @@ loader = GenericLoader.from_filesystem(
 )
 documents = loader.load()
 
+python_splitter = RecursiveCharacterTextSplitter.from_language(
+    language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
+)
+texts = python_splitter.split_documents(documents)
 
 
 memory = ConversationSummaryMemory(
