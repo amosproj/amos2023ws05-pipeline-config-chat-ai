@@ -1,26 +1,22 @@
 #%%
 import os
-import re
+import re 
 
 
 #%%
-def extract_triple_quoted_text(file_path):
-    with open(file_path, 'r') as file:
-        content = file.read()
-    return re.findall(r'\"\"\"(.*?)\"\"\"', content, re.DOTALL)
-#%%
-def search_directory(directory, output_file):
-    extracted_texts = ""
-    for root, dirs, files in os.walk(directory):
+def extract_and_save_docstrings(root_dir):
+    for subdir, dirs, files in os.walk(root_dir):
         for file in files:
             if file.endswith('.py'):
-                file_path = os.path.join(root, file)
-                extracted_text = extract_triple_quoted_text(file_path)
-                for text in extracted_text:
-                    extracted_texts += text
+                file_path = os.path.join(subdir, file)
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
 
-    with open(output_file, 'w') as file:
-        file.write(extracted_texts)
-#%% 
-search_directory('/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines', 'extracted_data.py')
+                docstrings = re.findall(r'""".*?"""', content, re.DOTALL)
+                extracted_text = '\n'.join(docstrings)
+
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(extracted_text)
+#%%
+extract_and_save_docstrings('/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines')
 # %%
