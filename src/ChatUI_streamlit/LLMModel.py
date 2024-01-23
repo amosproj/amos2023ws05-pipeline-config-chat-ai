@@ -107,6 +107,17 @@ lance_db = LanceDB.from_documents(texts, embeddings, connection=table)
 # Create a LanceDB retriever
 retriever2 = lance_db.as_retriever()
 
+
+# Check if _get_relevant_documents is implemented in retriever 1 and 2
+if hasattr(retriever1, '_get_relevant_documents'):
+    print("retriever1 has _get_relevant_documents method.")
+else:
+    print("retriever1 does not have _get_relevant_documents method.")
+if hasattr(retriever2, '_get_relevant_documents'):
+    print("retriever2 has _get_relevant_documents method.")
+else:
+    print("retriever2 does not have _get_relevant_documents method.")
+    
 memory = ConversationSummaryMemory(
     llm=llm, memory_key="chat_history", return_messages=True
 )
