@@ -37,3 +37,5 @@ bin/
 
 .databricks
 src/ChatUI_streamlit/.env
+openai_keys/*
+.gitignore
