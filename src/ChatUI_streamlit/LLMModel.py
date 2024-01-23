@@ -87,12 +87,31 @@ python_splitter = RecursiveCharacterTextSplitter.from_language(
 )
 texts = python_splitter.split_documents(documents)
 
+embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key)
+
+db = lancedb.connect("/tmp/lancedb")
+table = db.create_table(
+    "my_table",
+    data=[
+        {
+            "vector": embeddings.embed_query("Rtdip"),
+            "text": "Rtdip",
+            "id": "1",
+        }
+    ],
+    mode="overwrite",
+)
+
+
+lance_db = LanceDB.from_documents(texts, embeddings, connection=table)
+# Create a LanceDB retriever
+retriever2 = lance_db.as_retriever()
 
 memory = ConversationSummaryMemory(
     llm=llm, memory_key="chat_history", return_messages=True
 )
 
-RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriever1, memory=memory)
+RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriever2, memory=memory)
 
 
 # Set the LLM cache
