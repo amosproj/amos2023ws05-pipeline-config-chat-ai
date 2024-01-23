@@ -5,10 +5,47 @@ import requests
 import openai
 import subprocess
 from datetime import datetime
-
+import csv
 
 class InvalidAPIKeyException(Exception):
     pass
+
+def save_to_csv(conversation, filename='convers_data_nosession_idx.csv'):
+    # Check if the file already exists
+    file_exists = os.path.isfile(filename)
+    with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
+        #fieldnames = ['session_index', 'conversation_index', 'conversation_title', 'role', 'content']
+        fieldnames = [ 'conversation_index', 'conversation_title', 'role', 'content']
+
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        # Write header only if the file is newly created
+        if not file_exists:
+            writer.writeheader()
+
+        # Get the session index and conversation index counters
+        #session_index = st.session_state.get('session_index', 0)
+        conversation_index = st.session_state.get('conversation_index', 0)
+
+        # Get the last saved index or timestamp for the conversation
+        last_saved_index = st.session_state.get('last_saved_index', -1)
+
+        # Save messages from the last saved index to the end of the conversation
+        for idx, message in enumerate(conversation["messages"][last_saved_index + 1:]):
+            writer.writerow({
+                #'session_index': session_index,
+                'conversation_index': conversation_index,
+                'conversation_title': conversation["title"],
+                'role': message["role"],
+                'content': message["content"]
+            })
+
+        # Update the last saved index to the latest message
+        st.session_state['last_saved_index'] = len(conversation["messages"]) - 1
+                
+                
+def generate_unique_title():
+    return f"Conversation_{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
 # Function to check API key validity
 def is_valid_api_key(key):
@@ -34,8 +71,6 @@ def run_update_script():
     except subprocess.CalledProcessError as e:
         st.error(f"Failed to update RAG. Error: {e.stderr}")
         return e.stderr
-
-
     
     
 def get_last_modified_time(folder_path):
@@ -138,8 +173,13 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
                 placeholder.markdown(full_response)
         response_time = end_time - start_time
         st.write(f"Response generated in {response_time:.2f} seconds.")
+        # Generate a unique conversation title
+        new_title = generate_unique_title()
+        st.session_state.conversations[-1]["title"] = new_title
         message = {"role": "assistant", "content": full_response}
         conversation["messages"].append(message)
+        # Save the conversation to CSV
+        save_to_csv(conversation)
         
     if 'run_button' in st.session_state and st.session_state.run_button == True:
         st.session_state.running = True
@@ -147,10 +187,15 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         st.session_state.running = False
 
     if st.button("New Conversation", disabled=st.session_state.running, key='run_button'):
+        # Increment conversation index when starting a new conversation
+        st.session_state.conversation_index = st.session_state.get('conversation_index', 0) + 1
         # Clear chat messages
         st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
+        st.session_state.last_saved_index = -1
+
         # Trigger a rerun
         st.rerun()
-        
-
+    
+    #with st.sidebar():
+    #    st.session_state.conversations 
 
