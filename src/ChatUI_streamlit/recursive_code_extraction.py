@@ -11,8 +11,8 @@ def extract_example_code(file_path):
     pattern = r'```python(.*?)```'
 
     # Use re.findall to find all code blocks in the content
-    code_blocks = re.findall(pattern, content, re.DOTALL)
-
+    code_blocks = re.findall(r'""".*?"""', content, re.DOTALL)
+                
     return code_blocks
 
 def save_example_code(input_directory, output_directory):

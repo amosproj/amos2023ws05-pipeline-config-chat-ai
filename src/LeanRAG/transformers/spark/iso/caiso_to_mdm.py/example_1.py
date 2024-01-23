@@ -1,4 +1,11 @@
+"""
+    Converts CAISO Raw data into Meters Data Model.
 
+    Please check the BaseRawToMDMTransformer for the required arguments and methods.
+
+    Example
+    --------
+    ```python
     from rtdip_sdk.pipelines.transformers import CAISOToMDMTransformer
     from rtdip_sdk.pipelines.utilities import SparkSessionUtility
 
@@ -18,4 +25,5 @@
     )
 
     result = caiso_to_mdm_transformer.transform()
-    
+    ```
+    """

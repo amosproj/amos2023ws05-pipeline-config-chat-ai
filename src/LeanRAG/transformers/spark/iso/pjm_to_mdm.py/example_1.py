@@ -1,4 +1,11 @@
+"""
+    Converts PJM Raw data into Meters Data Model.
 
+    Please check the BaseRawToMDMTransformer for the required arguments and methods.
+
+    Example
+    --------
+    ```python
     from rtdip_sdk.pipelines.transformers import PJMToMDMTransformer
     from rtdip_sdk.pipelines.utilities import SparkSessionUtility
 
@@ -18,4 +25,8 @@
     )
 
     result = pjm_to_mdm_transformer.transform()
-    
+    ```
+
+    BaseRawToMDMTransformer:
+        ::: src.sdk.python.rtdip_sdk.pipelines.transformers.spark.base_raw_to_mdm
+    """

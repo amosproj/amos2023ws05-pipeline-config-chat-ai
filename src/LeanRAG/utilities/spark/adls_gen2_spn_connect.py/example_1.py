@@ -1,4 +1,9 @@
+"""
+    Configures Spark to Connect to an ADLS Gen 2 Storage Account using a Service Principal.
 
+    Example
+    --------
+    ```python
     from rtdip_sdk.pipelines.utilities import SparkADLSGen2SPNConnectUtility
     from rtdip_sdk.pipelines.utilities import SparkSessionUtility
 
@@ -14,4 +19,12 @@
     )
 
     result = adls_gen2_connect_utility.execute()
-    
+    ```
+
+    Parameters:
+        spark (SparkSession): Spark Session required to read data from cloud storage
+        storage_account (str): Name of the ADLS Gen 2 Storage Account
+        tenant_id (str): Tenant ID of the Service Principal
+        client_id (str): Service Principal Client ID
+        client_secret (str): Service Principal Client Secret
+    """

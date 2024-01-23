@@ -1,4 +1,9 @@
+"""
+    Sets configuration key value pairs to a Spark Session
 
+    Example
+    --------
+    ```python
     from rtdip_sdk.pipelines.sources import SparkConfigurationUtility
     from rtdip_sdk.pipelines.utilities import SparkSessionUtility
 
@@ -11,4 +16,9 @@
     )
 
     result = configuration_utility.execute()
-    
+    ```
+
+    Parameters:
+        spark (SparkSession): Spark Session required to read data from cloud storage
+        config (dict): Dictionary of spark configuration to be applied to the spark session
+    """

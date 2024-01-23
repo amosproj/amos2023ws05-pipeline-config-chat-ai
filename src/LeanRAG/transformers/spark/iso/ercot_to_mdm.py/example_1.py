@@ -1,4 +1,11 @@
+"""
+    Converts ERCOT Raw data into Meters Data Model.
 
+    Please check the BaseRawToMDMTransformer for the required arguments and methods.
+
+    Example
+    --------
+    ```python
     from rtdip_sdk.pipelines.transformers import ERCOTToMDMTransformer
     from rtdip_sdk.pipelines.utilities import SparkSessionUtility
 
@@ -18,4 +25,5 @@
     )
 
     result = ercot_to_mdm_transformer.transform()
-    
+    ```
+    """

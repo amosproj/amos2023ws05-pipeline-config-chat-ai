@@ -1,0 +1,1 @@
+"""Executes spark configuration to connect to an ADLS Gen 2 Storage Account using a service principal"""

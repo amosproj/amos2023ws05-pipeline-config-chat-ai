@@ -1,4 +1,9 @@
+"""
+    Converts a Pandas DataFrame to a PySpark DataFrame.
 
+    Example
+    --------
+    ```python
     from rtdip_sdk.pipelines.transformers import PandasToPySparkTransformer
     from rtdip_sdk.pipelines.utilities import SparkSessionUtility
 
@@ -11,4 +16,9 @@
     )
 
     result = pandas_to_pyspark.transform()
-    
+    ```
+
+    Parameters:
+        spark (SparkSession): Spark Session required to convert DataFrame
+        df (DataFrame): Pandas DataFrame to be converted
+    """

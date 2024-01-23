@@ -1,17 +1,4 @@
-
-        from rtdip_sdk.pipelines.sources import DataBricksAutoLoaderSource
-        from rtdip_sdk.pipelines.utilities import SparkSessionUtility
-
-        # Not required if using Databricks
-        spark = SparkSessionUtility(config={}).execute()
-
-        options = {}
-        path = "gs://{BUCKET-NAME}/{FILE-PATH}"
-        format = "{DESIRED-FILE-FORMAT}"
-
-        DataBricksAutoLoaderSource(spark, options, path, format).read_stream()
-
-        OR
-
-        DataBricksAutoLoaderSource(spark, options, path, format).read_batch()
-        
+"""
+        Raises:
+            NotImplementedError: Auto Loader only supports streaming reads. To perform a batch read, use the read_stream method of this component and specify the Trigger on the write_stream to be `availableNow` to perform batch-like reads of cloud storage files.
+        """
