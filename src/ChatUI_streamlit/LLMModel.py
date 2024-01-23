@@ -27,7 +27,7 @@ def initialize_components(openai_api_key):
     embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key)
 
     # Load and split documents
-    root_dir = '/Users/obi/Desktop/AMOS_New/amos2023ws05-pipeline-config-chat-ai/src/RAG'
+    root_dir = '/Users/obi/Desktop/AMOS_New/amos2023ws05-pipeline-config-chat-ai/src/LeanRAG'
     docs = []
     for dirpath, dirnames, filenames in os.walk(root_dir):
         for file in filenames:
