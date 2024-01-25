@@ -2,14 +2,12 @@ import streamlit as st
 import os
 import time
 import requests
-import openai
 import subprocess
 from datetime import datetime
-
-
+from pathlib import Path
+from dotenv import load_dotenv
 class InvalidAPIKeyException(Exception):
     pass
-
 # Function to check API key validity
 def is_valid_api_key(key):
     url = "https://api.openai.com/v1/models/gpt-3.5-turbo-instruct"
@@ -20,13 +18,66 @@ def is_valid_api_key(key):
     except Exception as e:
         print(f"An error occurred: {e}")
         return False
-
-
+# Function to load API keys from the openai_keys directory
+def load_api_keys():
+    keys_dir = Path('openai_keys')
+    keys_dir.mkdir(exist_ok=True)
+    api_keys = {}
+    for env_file in keys_dir.glob('*.env'):
+        load_dotenv(env_file)
+        key_name = env_file.stem
+        api_key = os.getenv('OPENAI_API_KEY')
+        if api_key:
+            api_keys[key_name] = api_key
+    return api_keys
+def initialize_chat_components(api_key):
+    if 'components_initialized' not in st.session_state:
+        from LLMModel import initialize_components
+        st.session_state.agent, st.session_state.RAG = initialize_components(api_key)
+        st.session_state['components_initialized'] = True
+# Function to add or select an API key
+def api_key_selection(api_keys):
+    selected_key_name = st.sidebar.selectbox('Select an API Key', options=list(api_keys.keys()), index=0)
+    if selected_key_name and api_keys[selected_key_name] != st.session_state.get('OPENAI_API_KEY', None):
+        st.session_state['OPENAI_API_KEY'] = api_keys[selected_key_name]
+        if is_valid_api_key(api_keys[selected_key_name]):
+            initialize_chat_components(api_keys[selected_key_name])
+            st.sidebar.success(f'Selected API Key: {selected_key_name}')
+        else:
+            st.sidebar.error('Invalid API Key. Please select a valid key.')
+    new_key_name = st.sidebar.text_input('Name for new API Key:')
+    new_key_value = st.sidebar.text_input('Enter new OpenAI API Key:', type='password')
+    if st.sidebar.button('Save API Key'):
+        if new_key_name and new_key_value and is_valid_api_key(new_key_value):
+            new_env_file = Path(f'openai_keys/{new_key_name}.env')
+            with new_env_file.open('w') as file:
+                file.write(f'OPENAI_API_KEY={new_key_value}\n')
+            api_keys[new_key_name] = new_key_value
+            st.session_state['OPENAI_API_KEY'] = new_key_value
+            initialize_chat_components(new_key_value)
+            st.sidebar.success(f'New API Key "{new_key_name}" saved and activated')
+        else:
+            st.sidebar.error('Invalid or missing data for new API Key.')
+# Function to check API key and update if necessary
+def check_and_update_api_key():
+    # Check if the OpenAI API key is already stored in the session
+    if 'OPENAI_API_KEY' not in st.session_state:
+        # If not, ask the user to input it
+        openai_api_key = st.text_input('Enter OpenAI API Key:', type='password')
+        if openai_api_key:
+            try:
+                if is_valid_api_key(openai_api_key):
+                    st.session_state['OPENAI_API_KEY'] = openai_api_key
+                    os.environ['OPENAI_API_KEY'] = openai_api_key
+                    st.success('API Key stored!')
+                else:
+                    raise InvalidAPIKeyException
+            except InvalidAPIKeyException:
+                st.error('Invalid OpenAI API Key. Please enter a valid key.')
 def run_update_script():
-    script_path = '../UpdateRAG/updateRAG.py'
+    script_path = '../src/UpdateRAG'
     absolute_script_path = os.path.join(os.getcwd(), script_path)
-    command = f'python "{absolute_script_path}"'
-    
+    command = f'python "{"/Users/obi/Desktop/AMOS_New/amos2023ws05-pipeline-config-chat-ai/src/UpdateRAG/updateRAG.py"}"'
     try:
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
         st.success("Successfully updated RAG.")
@@ -34,10 +85,6 @@ def run_update_script():
     except subprocess.CalledProcessError as e:
         st.error(f"Failed to update RAG. Error: {e.stderr}")
         return e.stderr
-
-
-    
-    
 def get_last_modified_time(folder_path):
     latest_mod_time = 0
     for root, _, files in os.walk(folder_path):
@@ -49,12 +96,10 @@ def get_last_modified_time(folder_path):
             except Exception as e:
                 pass
     return datetime.fromtimestamp(latest_mod_time).strftime("%Y-%m-%d") if latest_mod_time else None
-
 # Initialize page configuration once
 if 'page_config_set' not in st.session_state:
     st.set_page_config(page_title="RTDIP Pipeline Chatbot")
     st.session_state['page_config_set'] = True
-
 # HTML/CSS for title and GitHub link
 st.markdown(
     '''
@@ -63,20 +108,21 @@ st.markdown(
         <div style="margin-top: -70px; "><a href="https://github.com/rtdip/core/tree/develop"><img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github"></a></div>
     </div>
     ''', unsafe_allow_html=True)
-
-
+# Load API keys
+api_keys = load_api_keys()
+# Add API key selection UI
+api_key_selection(api_keys)
+# Check and update API key
+check_and_update_api_key()
 rag_folder_path = os.path.join("..", "RAG")
-
 last_modified_time = get_last_modified_time(rag_folder_path)
-
-left_col, right_col = st.columns([3, 1])  
-
+left_col, right_col = st.columns([3, 1])
 with right_col:
     button_style = """
     <style>
     .stButton>button {
-       max-width: 200px;  
-    margin-left: 45px; 
+       max-width: 200px;
+    margin-left: 45px;
     padding: 5px 10px;
     border-radius: 15px;
     }
@@ -85,42 +131,21 @@ with right_col:
     st.markdown(button_style, unsafe_allow_html=True)
     if st.button('Update RAG'):
         run_update_script()
-    st.caption(f"Last update: {last_modified_time}")  
-    
-
+    st.caption(f"Last update: {last_modified_time}")
 with left_col:
     st.write("")  # This will create space and push the button and text to the right
-
-# Check if the OpenAI API key is already stored in the session
-if 'OPENAI_API_KEY' not in st.session_state:
-    # If not, ask the user to input it
-    openai_api_key = st.text_input('Enter OpenAI API Key:', type='password')
-    if openai_api_key:
-        try:
-            if is_valid_api_key(openai_api_key):
-                st.session_state['OPENAI_API_KEY'] = openai_api_key
-                os.environ['OPENAI_API_KEY'] = openai_api_key
-                st.success('API Key stored!')
-            else:
-                raise InvalidAPIKeyException
-        except InvalidAPIKeyException:
-            st.error('Invalid OpenAI API Key. Please enter a valid key.')
-
-# Store LLM generated responses
-if "conversations" not in st.session_state.keys():
+if 'conversations' not in st.session_state:
     st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
-
-# Display or clear chat messages
-for conversation in st.session_state.conversations:
+# Check if the OpenAI API key is set in the session state
+if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
+    initialize_chat_components(st.session_state['OPENAI_API_KEY'])
+    # Initialize components with OpenAI API key
+    # Display all messages in the current conversation
+    conversation = st.session_state.conversations[-1]
     for message in conversation["messages"]:
         with st.chat_message(message["role"]):
             st.write(message["content"])
-
-# User-provided prompt
-if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
-    from LLMModel import RAG as RAG
     if prompt := st.chat_input():
-        conversation = st.session_state.conversations[-1]
         context = "\n".join([message["content"] for message in conversation["messages"]])
         conversation["messages"].append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -128,7 +153,7 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         with st.chat_message("assistant"):
             start_time = time.time()
             with st.spinner("Generating..."):
-                response = RAG.run(context + "\n" + prompt)
+                response = st.session_state.RAG.run(context + "\n" + prompt)
                 end_time = time.time()
                 placeholder = st.empty()
                 full_response = ''
@@ -140,17 +165,20 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         st.write(f"Response generated in {response_time:.2f} seconds.")
         message = {"role": "assistant", "content": full_response}
         conversation["messages"].append(message)
-        
     if 'run_button' in st.session_state and st.session_state.run_button == True:
         st.session_state.running = True
     else:
         st.session_state.running = False
-
     if st.button("New Conversation", disabled=st.session_state.running, key='run_button'):
-        # Clear chat messages
-        st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
+        # Start a new conversation
+        st.session_state.conversations.append({"title": "New Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]})
         # Trigger a rerun
         st.rerun()
-        
+else:
+    # If the API key is not set, continue showing the API key selection UI
+    st.write("Please select or enter an OpenAI API key to continue.")
+
+
+
 
 
