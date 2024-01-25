@@ -28,9 +28,8 @@ def initialize_components(openai_api_key):
     # Load the embeddings
     embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_key)
     # Load and split documents
-
-    script_directory = os.path.dirname(os.path.abspath(__file__))
-    root_dir = os.path.join(script_directory, '..', 'LeanRAG')
+    script_directory = get_script_directory()
+    root_dir = os.path.join(script_directory, '..','RAG')
 
     docs = []
     for dirpath, dirnames, filenames in os.walk(root_dir):
@@ -62,7 +61,6 @@ def initialize_components(openai_api_key):
     set_llm_cache(InMemoryCache())
     return agent, RAG
 # Function to update and retrieve conversation context
-
 def update_and_get_context(user_input, conversation_memory):
     conversation_memory.add_user_input(user_input)
     context = conversation_memory.get_conversation()
