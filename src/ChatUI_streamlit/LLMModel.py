@@ -1,4 +1,3 @@
-#%%
 import os
 from langchain.retrievers import BM25Retriever
 from langchain.chains import RetrievalQA
@@ -27,9 +26,12 @@ from langchain.text_splitter import Language
 from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
 import lancedb
+from langchain.embeddings.fake import FakeEmbeddings
+from langchain.docstore import InMemoryDocstore
+from langchain.docstore.document import Document
+import faiss
 
 
-#%%
 # Load the OpenAI API key
 load_dotenv()
 
@@ -46,26 +48,21 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 ###############  first content store using FAISS
 # # Load and split documents
 #root_dir = '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/RAG/pipelines'
-#root_dir = 'C://Users//lynda//OneDrive//Bureau//pc//amos2023ws05-pipeline-config-chat-ai//src//RAG'
-#docs = []
-#for dirpath, dirnames, filenames in os.walk(root_dir):
-#     for file in filenames:
-#         try:
-#           loader = TextLoader(os.path.join(dirpath, file), encoding='utf-8')
-#            docs.extend(loader.load_and_split())
-#         except Exception as e:
-#            pass  # Consider logging the exception for debugging
+root_dir = 'C://Users//lynda//OneDrive//Bureau//pc//amos2023ws05-pipeline-config-chat-ai//src//RAG'
+docs = []
+for dirpath, dirnames, filenames in os.walk(root_dir):
+     for file in filenames:
+         try:
+           loader = TextLoader(os.path.join(dirpath, file), encoding='utf-8')
+           docs.extend(loader.load_and_split())
+         except Exception as e:
+            pass  # Consider logging the exception for debugging
 
 # # Create the FAISS index
-#docsearch = FAISS.from_documents(docs, embeddings)
-#%%
+docsearch = FAISS.from_documents(docs, embeddings)
 # save the vector store offline for later use
 #faiss.write_index(docsearch.index, '/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index_file')
-#docsearch.save_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index")
-
-#%%
-#docsearch = FAISS.load_local("/Users/zainhazzouri/projects/amos2023ws05-pipeline-config-chat-ai/src/ChatUI_streamlit/faiss_index", embeddings)
-
+docsearch.save_local("C://Users//lynda//OneDrive//Bureau//pc//amos2023ws05-pipeline-config-chat-ai//src//ChatUI_streamlit//faiss_index")
 docsearch = FAISS.load_local("faiss_index", embeddings)
 retriever1= docsearch.as_retriever()
 # Check if the FAISS index is loaded properly
@@ -73,7 +70,7 @@ if docsearch.index.ntotal > 0:
     print("FAISS index is loaded and contains documents.")
 else:
     print("FAISS index is loaded but contains no documents.")
-#%%
+
 ############### second content store using LANCEDB
 
 loader = GenericLoader.from_filesystem(
@@ -114,6 +111,8 @@ retriever2 = lance_db.as_retriever()
 print(dir(lance_db))
 
 
+
+
 # Check if _get_relevant_documents is implemented in retriever 1 and 2
 if hasattr(retriever1, '_get_relevant_documents'):
     print("retriever1 has _get_relevant_documents method.")
@@ -144,12 +143,5 @@ def update_and_get_context(user_input, conversation_memory):
     model_input = "\n".join(context + [user_input])
     return model_input
 
-# Example usage (commented out for testing)
-# user_input = "What's the weather like today?"
-# model_input = update_and_get_context(user_input, conversation_memory)
-# response = llm.run(model_input)
-# print(response)
-
-# Note: You can uncomment and modify the testing code as per your use case.
 
 
