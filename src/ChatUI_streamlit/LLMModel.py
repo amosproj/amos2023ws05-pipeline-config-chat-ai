@@ -1,6 +1,6 @@
 #%%
 import os
-#from ensemble import EnsembleRetriever
+from langchain.retrievers import BM25Retriever
 from langchain.chains import RetrievalQA
 from langchain.cache import InMemoryCache
 from langchain.globals import set_llm_cache
@@ -118,11 +118,14 @@ if hasattr(retriever2, '_get_relevant_documents'):
 else:
     print("retriever2 does not have _get_relevant_documents method.")
     
+
+    
 memory = ConversationSummaryMemory(
     llm=llm, memory_key="chat_history", return_messages=True
 )
 
-RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriever2, memory=memory)
+lotr = MergerRetriever(retrievers=[retriever1, retriever2])
+RAG = ConversationalRetrievalChain.from_llm(llm, retriever=lotr, memory=memory)
 
 
 # Set the LLM cache
@@ -143,4 +146,4 @@ def update_and_get_context(user_input, conversation_memory):
 
 # Note: You can uncomment and modify the testing code as per your use case.
 
-# %%
+
