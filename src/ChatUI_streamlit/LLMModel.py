@@ -144,4 +144,13 @@ def update_and_get_context(user_input, conversation_memory):
     return model_input
 
 
+test_query = " I would like to use RTDIP components to read from PythonDeltaSharingSource, transform using SSIPPIBinaryFileToPCDMTransformer, then write to SparkEventhubDestination"
 
+# Test FAISS retriever
+faiss_results = retriever1.get_relevant_documents(test_query)
+print("FAISS results:", faiss_results)
+
+
+# Test LanceDB retriever
+lance_results = retriever2.get_relevant_documents(test_query)
+print("LanceDB results:", lance_results)
