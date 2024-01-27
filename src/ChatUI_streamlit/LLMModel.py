@@ -68,8 +68,11 @@ embeddings = OpenAIEmbeddings(disallowed_special=(), openai_api_key=openai_api_k
 
 docsearch = FAISS.load_local("faiss_index", embeddings)
 retriever1= docsearch.as_retriever()
-
-
+# Check if the FAISS index is loaded properly
+if docsearch.index.ntotal > 0:
+    print("FAISS index is loaded and contains documents.")
+else:
+    print("FAISS index is loaded but contains no documents.")
 #%%
 ############### second content store using LANCEDB
 
@@ -106,6 +109,9 @@ table = db.create_table(
 lance_db = LanceDB.from_documents(texts, embeddings, connection=table)
 # Create a LanceDB retriever
 retriever2 = lance_db.as_retriever()
+
+# Check if the LanceDB table has documents
+print(dir(lance_db))
 
 
 # Check if _get_relevant_documents is implemented in retriever 1 and 2
