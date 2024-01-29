@@ -2,13 +2,13 @@
 # Tests Results for Solution 2 :
 
 As a team, we decided to experiment with the merge retriever concept, reasoning that using two retrievers instead of one might yield superior results.
-### (For a detailed breakdown of my specific contributions to this task, please refer to the feature/improve_the_content_store branch, as these changes may not be merged into the main branch.)
+### For a detailed breakdown of my specific contributions to this task, please refer to the "feature/improve_the_content_store" branch, as these changes may not be merged into the main branch.
 
 Notably,  I integrated LanceDB as our primary retriever, replacing Chroma in our combination with FAiss. This shift was based on insights gathered from GitHub discussions, which indicated that Chroma was not as effective in a merged context.
 
 However, an unexpected outcome arose with the Lotr implementation. Contrary to our goals, after merging the two retrievers, Lotr did not return any codes, which was not the intended behavior, as evident from the attached screenshot.
 
-![LOTR Image](TestsScreenshots/lotr.png)
+<a href="TestsScreenshots/lotr.png" target="_blank"><img src="TestsScreenshots/lotr.png" width="100" alt="LOTR Image"></a>
 
 Moving forward, I decided to focus only on LanceDB. Given our extensive experience with Faiss and the previous shift to Chroma (which initially showed improved results), exploring LanceDB exclusively seemed a rational step.
 
@@ -20,26 +20,25 @@ The results with LanceDB combined with the new RAG were disappointing. Contrary 
 
 ## Queries and Results :
 Query 68: I would like to use RTDIP components to read from PythonDeltaSource, transform using PandasToPySparkTransformer, then write to PythonDeltaDestination
-![LOTR Image](TestsScreenshots/query68.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query68.png" target="_blank"><img src="TestsScreenshots/query68.png" width="100" alt="Query 68 Image"></a>
+<7div>
 Query 228: I would like to use RTDIP components to read from PythonDeltaSharingSource, transform using EdgeXOPCUAJsonToPCDMTransformer, then write to SparkKinesisDestination
-![LOTR Image](TestsScreenshots/query228.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query228.png" target="_blank"><img src="TestsScreenshots/query228.png" width="100" alt="Query 228 Image"></a>
+</div>
 Query 663: I would like to use RTDIP components to read from SparkDeltaSource, transform using PandasToPySparkTransformer, then write to SparkDeltaDestination
-![LOTR Image](TestsScreenshots/query663.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query663.png" target="_blank"><img src="TestsScreenshots/query663.png" width="100" alt="Query 663 Image"></a>
+</div>
 Query 689: I would like to use RTDIP components to read from SparkDeltaSource, transform using PySparkToPandasTransformer, then write to SparkKafkaEventhubDestination
-![LOTR Image](TestsScreenshots/query689.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query689.png" target="_blank"><img src="TestsScreenshots/query689.png" width="100" alt="Query 689 Image"></a>
+</div>
 Query 1205: I would like to use RTDIP components to read from SparkIoThubSource, transform using BinaryToStringTransformer, then write to SparkKafkaDestination
-![LOTR Image](TestsScreenshots/query1205.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query1205.png" target="_blank"><img src="TestsScreenshots/query1205.png" width="100" alt="Query 1205 Image"></a>
+</div>
 Query 2397: I would like to use RTDIP components to read from MISODailyLoadISOSource, transform using BinaryToStringTransformer, then write to SparkPCDMToDeltaDestination
-![LOTR Image](TestsScreenshots/query2397.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query2397.png" target="_blank"><img src="TestsScreenshots/query2397.png" width="100" alt="Query 2397 Image"></a>
+</div>
 Query 3435: I would like to use RTDIP components to read from SparkWeatherCompanyForecastAPIV1Source, transform using PandasToPySparkTransformer, then write to SparkDeltaDestination
-![LOTR Image](TestsScreenshots/query3435.png)
-
-
+<div style="text-align: center;"><a href="TestsScreenshots/query3435.png" target="_blank"><img src="TestsScreenshots/query3435.png" width="100" alt="Query 3435 Image"></a>
+</div>
 
 
