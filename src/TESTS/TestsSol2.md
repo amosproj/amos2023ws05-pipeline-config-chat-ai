@@ -20,26 +20,25 @@ The results with LanceDB combined with the new RAG were disappointing. Contrary 
 
 ## Queries and Results :
 Query 68: I would like to use RTDIP components to read from PythonDeltaSource, transform using PandasToPySparkTransformer, then write to PythonDeltaDestination
-<a href="TestsScreenshots/query68.png" target="_blank"><img src="TestsScreenshots/query68.png" width="100" alt="Query 68 Image"></a>
-
+<div style="text-align: center;"><a href="TestsScreenshots/query68.png" target="_blank"><img src="TestsScreenshots/query68.png" width="100" alt="Query 68 Image"></a>
+<7div>
 Query 228: I would like to use RTDIP components to read from PythonDeltaSharingSource, transform using EdgeXOPCUAJsonToPCDMTransformer, then write to SparkKinesisDestination
-![LOTR Image](TestsScreenshots/query228.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query228.png" target="_blank"><img src="TestsScreenshots/query228.png" width="100" alt="Query 228 Image"></a>
+</div>
 Query 663: I would like to use RTDIP components to read from SparkDeltaSource, transform using PandasToPySparkTransformer, then write to SparkDeltaDestination
-![LOTR Image](TestsScreenshots/query663.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query663.png" target="_blank"><img src="TestsScreenshots/query663.png" width="100" alt="Query 663 Image"></a>
+</div>
 Query 689: I would like to use RTDIP components to read from SparkDeltaSource, transform using PySparkToPandasTransformer, then write to SparkKafkaEventhubDestination
-![LOTR Image](TestsScreenshots/query689.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query689.png" target="_blank"><img src="TestsScreenshots/query689.png" width="100" alt="Query 689 Image"></a>
+</div>
 Query 1205: I would like to use RTDIP components to read from SparkIoThubSource, transform using BinaryToStringTransformer, then write to SparkKafkaDestination
-![LOTR Image](TestsScreenshots/query1205.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query1205.png" target="_blank"><img src="TestsScreenshots/query1205.png" width="100" alt="Query 1205 Image"></a>
+</div>
 Query 2397: I would like to use RTDIP components to read from MISODailyLoadISOSource, transform using BinaryToStringTransformer, then write to SparkPCDMToDeltaDestination
-![LOTR Image](TestsScreenshots/query2397.png)
-
+<div style="text-align: center;"><a href="TestsScreenshots/query2397.png" target="_blank"><img src="TestsScreenshots/query2397.png" width="100" alt="Query 2397 Image"></a>
+</div>
 Query 3435: I would like to use RTDIP components to read from SparkWeatherCompanyForecastAPIV1Source, transform using PandasToPySparkTransformer, then write to SparkDeltaDestination
-![LOTR Image](TestsScreenshots/query3435.png)
-
-
+<div style="text-align: center;"><a href="TestsScreenshots/query3435.png" target="_blank"><img src="TestsScreenshots/query3435.png" width="100" alt="Query 3435 Image"></a>
+</div>
 
 
