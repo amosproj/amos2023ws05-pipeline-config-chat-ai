@@ -2,7 +2,7 @@
 # Tests Results for Solution 2 :
 
 As a team, we decided to experiment with the merge retriever concept, reasoning that using two retrievers instead of one might yield superior results.
-## (For a detailed breakdown of my specific contributions to this task, please refer to the feature/improve_the_content_store branch, as these changes may not be merged into the main branch.)
+### (For a detailed breakdown of my specific contributions to this task, please refer to the feature/improve_the_content_store branch, as these changes may not be merged into the main branch.)
 
 Notably,  I integrated LanceDB as our primary retriever, replacing Chroma in our combination with FAiss. This shift was based on insights gathered from GitHub discussions, which indicated that Chroma was not as effective in a merged context.
 
