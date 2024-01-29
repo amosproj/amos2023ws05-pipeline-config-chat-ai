@@ -36,7 +36,7 @@ def save_to_database(conversation):
     cursor = connection.cursor()
 
     # Get the conversation title and conversation index
-    conversation_title = conversation["title"]
+    conversation_title = st.session_state.conversation_titles[-1]  # Get the latest conversation title
     conversation_index = conversation["messages"][-1]["conversation_index"]
 
     # Save only the new messages since the last saved index
@@ -85,8 +85,35 @@ def run_update_script():
     except subprocess.CalledProcessError as e:
         st.error(f"Failed to update RAG. Error: {e.stderr}")
         return e.stderr
-    
-    
+
+# Function to fetch messages from the database based on conversation title
+def fetch_messages(conversation_title):
+    connection = sqlite3.connect("conversations.db")
+    cursor = connection.cursor()
+    cursor.execute('''
+        SELECT role, content FROM conversations WHERE title=?
+    ''', (conversation_title,))
+    messages = cursor.fetchall()
+    connection.close()
+    return messages
+
+# Initialize a list to store conversation titles
+if 'conversation_titles' not in st.session_state:
+    st.session_state.conversation_titles = ["Default Conversation"]
+
+def display_messages(title):
+    messages = fetch_messages(title)
+    for role, content in messages:
+        with st.chat_message(role):
+            st.write(content)
+
+# Function to update the sidebar with conversation titles
+def update_sidebar():
+    for title in st.session_state.conversation_titles:
+        if st.sidebar.button(title):
+            display_messages(title)
+
+
 def get_last_modified_time(folder_path):
     latest_mod_time = 0
     for root, _, files in os.walk(folder_path):
@@ -205,13 +232,6 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         response_time = end_time - start_time
         st.write(f"Response generated in {response_time:.2f} seconds.")
         
-        # Update conversation index for both user and assistant messages : wrong
-        #st.session_state.conversation_index += 1
-        
-        # Generate a unique conversation title
-        new_title = generate_unique_title()
-        st.session_state.conversations[-1]["title"] = new_title
-        
         # Set conversation_index for the assistant message
         message = {"role": "assistant", "content": full_response, "conversation_index": st.session_state.conversation_index}
         conversation["messages"].append(message)
@@ -232,5 +252,14 @@ if 'OPENAI_API_KEY' in st.session_state and st.session_state['OPENAI_API_KEY']:
         st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
         st.session_state.last_saved_index = -1
 
+        new_title = generate_unique_title()
+        st.session_state.conversation_titles.append(new_title)
+        # Update the sidebar with the new conversation title
+        st.sidebar.button(new_title)
         # Trigger a rerun
         st.rerun()
+
+    # Display sidebar
+    with st.sidebar:
+        st.write("Conversations")
+        update_sidebar()
