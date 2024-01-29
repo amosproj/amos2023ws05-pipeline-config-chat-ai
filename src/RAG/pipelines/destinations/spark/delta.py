@@ -1,29 +1,4 @@
-# Copyright 2022 RTDIP
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-import logging
-import time
-from pyspark.sql import DataFrame
-from py4j.protocol import Py4JJavaError
-
-from ..interfaces import DestinationInterface
-from ..._pipeline_utils.models import Libraries, SystemType
-from ..._pipeline_utils.constants import get_default_package
-
-
-class SparkDeltaDestination(DestinationInterface):
-    """
+"""
     The Spark Delta Destination is used to write data to a Delta table.
 
     Examples
@@ -85,125 +60,13 @@ class SparkDeltaDestination(DestinationInterface):
         partitionOverwriteMode (str): When set to dynamic, overwrites all existing data in each logical partition for which the write will commit new data. Default is static. (Batch)
         overwriteSchema (bool str): If True, overwrites the schema as well as the table data. (Batch)
     """
-
-    data: DataFrame
-    options: dict
-    destination: str
-    mode: str
-    trigger: str
-    query_name: str
-    query_wait_interval: int
-
-    def __init__(
-        self,
-        data: DataFrame,
-        options: dict,
-        destination: str,
-        mode: str = "append",
-        trigger: str = "10 seconds",
-        query_name: str = "DeltaDestination",
-        query_wait_interval: int = None,
-    ) -> None:
-        self.data = data
-        self.options = options
-        self.destination = destination
-        self.mode = mode
-        self.trigger = trigger
-        self.query_name = query_name
-        self.query_wait_interval = query_wait_interval
-
-    @staticmethod
-    def system_type():
-        """
+"""
         Attributes:
             SystemType (Environment): Requires PYSPARK
         """
-        return SystemType.PYSPARK
-
-    @staticmethod
-    def libraries():
-        libraries = Libraries()
-        libraries.add_maven_library(get_default_package("spark_delta_core"))
-        return libraries
-
-    @staticmethod
-    def settings() -> dict:
-        return {
-            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
-            "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-        }
-
-    def pre_write_validation(self):
-        return True
-
-    def post_write_validation(self):
-        return True
-
-    def write_batch(self):
-        """
+"""
         Writes batch data to Delta. Most of the options provided by the Apache Spark DataFrame write API are supported for performing batch writes on tables.
         """
-        try:
-            if "/" in self.destination:
-                return (
-                    self.data.write.format("delta")
-                    .mode(self.mode)
-                    .options(**self.options)
-                    .save(self.destination)
-                )
-            else:
-                return (
-                    self.data.write.format("delta")
-                    .mode(self.mode)
-                    .options(**self.options)
-                    .saveAsTable(self.destination)
-                )
-
-        except Py4JJavaError as e:
-            logging.exception(e.errmsg)
-            raise e
-        except Exception as e:
-            logging.exception(str(e))
-            raise e
-
-    def write_stream(self):
-        """
+"""
         Writes streaming data to Delta. Exactly-once processing is guaranteed
         """
-        TRIGGER_OPTION = (
-            {"availableNow": True}
-            if self.trigger == "availableNow"
-            else {"processingTime": self.trigger}
-        )
-        try:
-            if "/" in self.destination:
-                query = (
-                    self.data.writeStream.trigger(**TRIGGER_OPTION)
-                    .format("delta")
-                    .queryName(self.query_name)
-                    .outputMode(self.mode)
-                    .options(**self.options)
-                    .start(self.destination)
-                )
-            else:
-                query = (
-                    self.data.writeStream.trigger(**TRIGGER_OPTION)
-                    .format("delta")
-                    .queryName(self.query_name)
-                    .outputMode(self.mode)
-                    .options(**self.options)
-                    .toTable(self.destination)
-                )
-
-            if self.query_wait_interval:
-                while query.isActive:
-                    if query.lastProgress:
-                        logging.info(query.lastProgress)
-                    time.sleep(self.query_wait_interval)
-
-        except Py4JJavaError as e:
-            logging.exception(e.errmsg)
-            raise e
-        except Exception as e:
-            logging.exception(str(e))
-            raise e
