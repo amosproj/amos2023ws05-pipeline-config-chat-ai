@@ -11,16 +11,30 @@ from langchain.vectorstores import Chroma as ChromaCommunity, FAISS
 from langchain.memory import ConversationSummaryMemory, ConversationBufferMemory
 from langchain.agents import AgentType, Tool, initialize_agent
 from langchain.chat_models import ChatOpenAI
+from pathlib import Path
 
 def get_script_directory():
     # Get the absolute path of the directory containing this script
     return os.path.dirname(os.path.abspath(__file__))
 
 def initialize_components(openai_api_key):
-    # Load environment variables
-    load_dotenv()
-    openai_api_key = os.environ.get("OPENAI_API_KEY")
-    assert openai_api_key is not None, "OpenAI API key is not provided"
+    env_files_dir = Path(__file__).parent / 'openai_keys'
+
+    # Ensure the directory exists
+    if not env_files_dir.exists():
+        raise FileNotFoundError("The 'openai_keys' directory does not exist.")
+
+    # Iterate through each .env file in the directory
+    for env_file in env_files_dir.glob('*.env'):
+        # Load the .env file
+        load_dotenv(env_file)
+
+        # Retrieve the API key from the loaded .env file
+        loaded_api_key = os.getenv("OPENAI_API_KEY")
+
+        # Check if the loaded API key matches the provided key value
+        if loaded_api_key == openai_api_key:
+            assert openai_api_key is not None, "OpenAI API key is not provided"
 
     # Initialize the language model
     llm = ChatOpenAI(model_name='gpt-3.5-turbo', openai_api_key=openai_api_key)
