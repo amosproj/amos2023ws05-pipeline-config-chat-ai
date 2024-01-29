@@ -97,9 +97,10 @@ def fetch_messages(conversation_title):
     connection.close()
     return messages
 
-# Initialize a list to store conversation titles
 if 'conversation_titles' not in st.session_state:
-    st.session_state.conversation_titles = ["Default Conversation"]
+    # Generate unique title for the first conversation
+    first_title = generate_unique_title()
+    st.session_state.conversation_titles = [first_title]
 
 def display_messages(title):
     messages = fetch_messages(title)
@@ -191,7 +192,7 @@ if 'OPENAI_API_KEY' not in st.session_state:
 
 # Store LLM generated responses
 if "conversations" not in st.session_state.keys():
-    st.session_state.conversations = [{"title": "Default Conversation", "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
+    st.session_state.conversations = [{"title": st.session_state.conversation_titles[0], "messages": [{"role": "assistant", "content": "How may I assist you today?"}]}]
 # Initialize the database once
 initialize_database()
 
