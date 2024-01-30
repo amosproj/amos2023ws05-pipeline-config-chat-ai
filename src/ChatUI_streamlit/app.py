@@ -63,6 +63,9 @@ def api_key_selection(api_keys):
     # Path to the 'openai_keys' folder at the same level as the script
     openai_keys_dir = script_directory / 'openai_keys'
 
+    # Add a toggle for saving API keys
+    save_api_key = st.sidebar.checkbox("Save API Key", value=False)
+
     selected_key_name = st.sidebar.selectbox('Select an API Key', options=list(api_keys.keys()), index=0)
     if selected_key_name and api_keys[selected_key_name] != st.session_state.get('OPENAI_API_KEY', None):
         st.session_state['OPENAI_API_KEY'] = api_keys[selected_key_name]
@@ -73,29 +76,49 @@ def api_key_selection(api_keys):
             if 'OPENAI_API_KEY' in st.session_state:
                 del st.session_state['OPENAI_API_KEY']
     
-    new_key_name = st.sidebar.text_input('Name for new API Key:')
-    new_key_value = st.sidebar.text_input('Enter new OpenAI API Key:', type='password')
-    if st.sidebar.button('Save API Key'):
-        try:
-            if new_key_name and new_key_value and is_valid_api_key(new_key_value):
-                # Create the 'openai_keys' directory if it doesn't exist
-                openai_keys_dir.mkdir(parents=True, exist_ok=True)
+    # Proceed to save the API key only if the toggle is marked
+    if save_api_key:
+        new_key_name = st.sidebar.text_input('Name for new API Key:')
+        new_key_value = st.sidebar.text_input('Enter new OpenAI API Key:', type='password')
+        if st.sidebar.button('Apply'):
+            try:
+                if new_key_name and new_key_value and is_valid_api_key(new_key_value):
+                    # Create the 'openai_keys' directory if it doesn't exist
+                    openai_keys_dir.mkdir(parents=True, exist_ok=True)
 
-                # Path to the new API key file
-                new_env_file = openai_keys_dir / f'{new_key_name}.env'
+                    # Path to the new API key file
+                    new_env_file = openai_keys_dir / f'{new_key_name}.env'
 
-                # Write the API key to the file
-                with new_env_file.open('w') as file:
-                    file.write(f'OPENAI_API_KEY={new_key_value}\n')
+                    # Write the API key to the file
+                    with new_env_file.open('w') as file:
+                        file.write(f'OPENAI_API_KEY={new_key_value}\n')
 
-                api_keys[new_key_name] = new_key_value
-                st.session_state['OPENAI_API_KEY'] = new_key_value
-                initialize_chat_components()
-                st.sidebar.success(f'New API Key "{new_key_name}" saved and activated')
-            else:
-                st.sidebar.error('Invalid or missing data for new API Key.')
-        except Exception as e:
-            st.sidebar.error(f'An error occurred: {e}')
+                    api_keys[new_key_name] = new_key_value
+                    st.session_state['OPENAI_API_KEY'] = new_key_value
+                    initialize_chat_components()
+                    st.sidebar.success(f'New API Key "{new_key_name}" saved and activated')
+
+                else:
+                    st.sidebar.error('Invalid or missing data for new API Key.')
+            except Exception as e:
+                st.sidebar.error(f'An error occurred: {e}')
+    else:
+        new_key_name = st.sidebar.text_input('Name for new API Key:', value='')
+        new_key_value = st.sidebar.text_input('Enter new OpenAI API Key:', type='password', value='')
+        if st.sidebar.button('Apply'):
+            try:
+                if new_key_name and new_key_value and is_valid_api_key(new_key_value):
+                    # Don't save the API key
+                    api_keys[new_key_name] = new_key_value
+                    st.session_state['OPENAI_API_KEY'] = new_key_value
+                    initialize_chat_components()
+                    st.sidebar.success(f'New API Key "{new_key_name}" activated (not saved)')
+                    st.sidebar.empty()
+                else:
+                    st.sidebar.error('Invalid or missing data for new API Key.')
+            except Exception as e:
+                st.sidebar.error(f'An error occurred: {e}')
+
 
 # Function to check API key and update if necessary
 def check_and_update_api_key():
@@ -126,10 +149,10 @@ def run_update_script():
 
     try:
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
-        st.success("Successfully updated RAG.")
+        st.success("Successfully updated content store.")
         return result.stdout
     except subprocess.CalledProcessError as e:
-        st.error(f"Failed to update RAG. Error: {e.stderr}")
+        st.error(f"Failed to update content store. Error: {e.stderr}")
         return e.stderr
 def get_last_modified_time(folder_path):
     latest_mod_time = 0
@@ -150,7 +173,7 @@ if 'page_config_set' not in st.session_state:
 st.markdown(
     '''
     <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="margin-top: -70px; margin-left: -180px;"><h2>RTDIP Pipeline Chatbot</h2></div>
+        <div style="margin-top: -70px; margin-left: 10px;"><h2>RTDIP Pipeline Chatbot</h2></div>
         <div style="margin-top: -70px; "><a href="https://github.com/rtdip/core/tree/develop"><img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github"></a></div>
     </div>
     ''', unsafe_allow_html=True)
@@ -175,9 +198,10 @@ with right_col:
     </style>
     """
     st.markdown(button_style, unsafe_allow_html=True)
-    if st.button('Update RAG'):
+    if st.button('Update content store'):
         run_update_script()
     st.caption(f"Last update: {last_modified_time}")
+
 with left_col:
     st.write("")  # This will create space and push the button and text to the right
 if 'conversations' not in st.session_state:
@@ -223,8 +247,3 @@ if 'OPENAI_API_KEY' in st.session_state and is_valid_api_key(st.session_state['O
 else:
     # If the API key is not set, continue showing the API key selection UI
     st.write("Please select or enter an OpenAI API key to continue.")
-
-
-
-
-
