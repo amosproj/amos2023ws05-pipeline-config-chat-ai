@@ -83,6 +83,10 @@ def initialize_components(openai_api_key):
 
     # Set the LLM cache
     set_llm_cache(InMemoryCache())
+    # Set the LLM cache
+    set_llm_cache(InMemoryCache())
+
+    return agent, RAG
 
     return agent, RAG
 
