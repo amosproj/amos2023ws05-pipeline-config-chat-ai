@@ -97,7 +97,7 @@ def api_key_selection(api_keys):
                     st.session_state['OPENAI_API_KEY'] = new_key_value
                     initialize_chat_components()
                     st.sidebar.success(f'New API Key "{new_key_name}" saved and activated')
-            
+
                 else:
                     st.sidebar.error('Invalid or missing data for new API Key.')
             except Exception as e:
@@ -113,7 +113,7 @@ def api_key_selection(api_keys):
                     st.session_state['OPENAI_API_KEY'] = new_key_value
                     initialize_chat_components()
                     st.sidebar.success(f'New API Key "{new_key_name}" activated (not saved)')
-                
+                    st.sidebar.empty()
                 else:
                     st.sidebar.error('Invalid or missing data for new API Key.')
             except Exception as e:
@@ -173,7 +173,7 @@ if 'page_config_set' not in st.session_state:
 st.markdown(
     '''
     <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="margin-top: -70px; margin-left: -180px;"><h2>RTDIP Pipeline Chatbot</h2></div>
+        <div style="margin-top: -70px; margin-left: 10px;"><h2>RTDIP Pipeline Chatbot</h2></div>
         <div style="margin-top: -70px; "><a href="https://github.com/rtdip/core/tree/develop"><img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github"></a></div>
     </div>
     ''', unsafe_allow_html=True)
@@ -201,6 +201,7 @@ with right_col:
     if st.button('Update content store'):
         run_update_script()
     st.caption(f"Last update: {last_modified_time}")
+
 with left_col:
     st.write("")  # This will create space and push the button and text to the right
 if 'conversations' not in st.session_state:
