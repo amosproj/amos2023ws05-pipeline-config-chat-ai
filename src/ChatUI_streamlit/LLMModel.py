@@ -65,7 +65,7 @@ def initialize_components(openai_api_key):
 
     # Initialize ConversationSummaryMemory
     conversation_memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
-
+    
     # Initialize RetrievalQA with ConversationalRetrievalChain
     RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriver2, memory=conversation_memory)
 
@@ -83,10 +83,6 @@ def initialize_components(openai_api_key):
 
     # Set the LLM cache
     set_llm_cache(InMemoryCache())
-    # Set the LLM cache
-    set_llm_cache(InMemoryCache())
-
-    return agent, RAG
 
     return agent, RAG
 
