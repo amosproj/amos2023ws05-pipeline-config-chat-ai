@@ -1,8 +1,8 @@
+#%%
 import os
 from dotenv import load_dotenv
 from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 from langchain.cache import InMemoryCache
-from langchain.globals import set_llm_cache
 from langchain.document_loaders.generic import GenericLoader
 from langchain.document_loaders.parsers import LanguageParser
 from langchain.text_splitter import Language, RecursiveCharacterTextSplitter
@@ -12,7 +12,7 @@ from langchain.memory import ConversationSummaryMemory, ConversationBufferMemory
 from langchain.agents import AgentType, Tool, initialize_agent
 from langchain.chat_models import ChatOpenAI
 from pathlib import Path
-
+#%%
 def get_script_directory():
     # Get the absolute path of the directory containing this script
     return os.path.dirname(os.path.abspath(__file__))
@@ -80,13 +80,6 @@ def initialize_components(openai_api_key):
     agent = initialize_agent(
         tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True, memory=conversation_memory, handle_parsing_errors=True
     )
-
-    # Set the LLM cache
-    set_llm_cache(InMemoryCache())
-    # Set the LLM cache
-    set_llm_cache(InMemoryCache())
-
-    return agent, RAG
 
     return agent, RAG
 

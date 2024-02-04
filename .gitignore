@@ -38,3 +38,4 @@ bin/
 .databricks
 src/ChatUI_streamlit/.env
 src/ChatUI_streamlit/openai_keys/Zain.env
+src/ChatUI_streamlit/openai_keys/Demo-Video.env

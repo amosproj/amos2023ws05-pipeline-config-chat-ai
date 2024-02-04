@@ -223,7 +223,7 @@ if 'OPENAI_API_KEY' in st.session_state and is_valid_api_key(st.session_state['O
         with st.chat_message("assistant"):
             start_time = time.time()
             with st.spinner("Generating..."):
-                response = st.session_state.RAG.run(prompt)
+                response = st.session_state.RAG.run(context + "\n" + prompt)
                 end_time = time.time()
                 placeholder = st.empty()
                 full_response = ''
