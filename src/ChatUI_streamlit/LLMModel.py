@@ -65,7 +65,7 @@ def initialize_components(openai_api_key):
 
     # Initialize ConversationSummaryMemory
     conversation_memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
-
+    
     # Initialize RetrievalQA with ConversationalRetrievalChain
     RAG = ConversationalRetrievalChain.from_llm(llm, retriever=retriver2, memory=conversation_memory)
 
@@ -93,3 +93,12 @@ def update_and_get_context(user_input, conversation_memory):
     model_input = "\n".join(context + [user_input])
     return model_input
 
+# Example usage (commented out for testing)
+# user_input = "What's the weather like today?"
+# model_input = update_and_get_context(user_input, conversation_memory)
+# response = llm.run(model_input)
+# print(response)
+
+# Note: You can uncomment and modify the testing code as per your use case.
+
+# %%
