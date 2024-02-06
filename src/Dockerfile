@@ -28,10 +28,10 @@ RUN locale-gen ${LANG}
 RUN pip3 install --upgrade pip
 
 # Copy the requirements.txt file into the container
-COPY requirements.txt ./
+COPY requirements_Obi.txt ./
 
 # Install Python dependencies
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements_Obi.txt
 # Copy the RAG folder, .env file, and ChatUI_streamlit folder into the container
 COPY RAG/ RAG/
 #COPY ChatUI_streamlit/.streamlit .streamlit

@@ -6,6 +6,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
+from extract_automation import extract_and_save_docstrings
 class InvalidAPIKeyException(Exception):
     pass
 # Function to check API key validity
@@ -46,6 +47,10 @@ def load_api_keys():
             api_keys[key_name] = api_key
 
     return api_keys
+
+def get_script_directory():
+    # Get the absolute path of the directory containing this script
+    return os.path.dirname(os.path.abspath(__file__))
 
 def initialize_chat_components():
     api_key = st.session_state.get('OPENAI_API_KEY')
@@ -149,6 +154,8 @@ def run_update_script():
 
     try:
         result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        root_dir = os.path.join(get_script_directory(), '..', 'RAG')
+        extract_and_save_docstrings(root_dir)
         st.success("Successfully updated content store.")
         return result.stdout
     except subprocess.CalledProcessError as e:
